@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Nghiệp vụ Khảo thí DNTU - DŨNG TRẦN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .correct { 
+            border-color: #10b981 !important; 
+            background-color: #f0fdf4 !important; 
+            color: #065f46 !important; 
+        }
+        .incorrect { 
+            border-color: #ef4444 !important; 
+            background-color: #fef2f2 !important; 
+            color: #991b1b !important; 
+        }
+        .animate-pop { animation: pop 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes pop {
+            0% { transform: scale(0.96); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex items-center justify-center p-3 sm:p-6">
+
+    <script>
+        const ADMIN_NAME = "Dũng Trần";
+        const ADMIN_FULL_BRANDING = "Phát triển bởi người đam mê khảo thí";
+        const ADMIN_ZALO = "0372251694"; 
+    </script>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="max-w-md w-full glass-morphism p-6 sm:p-8 rounded-3xl shadow-2xl transition-all animate-pop">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-tr from-blue-700 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white font-extrabold text-2xl shadow-xl shadow-blue-500/20">
+                DT
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Ôn tập Khảo thí DNTU</h1>
+            <p id="branding-login" class="text-blue-600 font-bold text-[11px] mt-2 uppercase tracking-wide leading-relaxed"></p>
+        </div>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-extrabold text-slate-500 mb-2 uppercase tracking-wider">Họ và tên Giảng viên / Nhân viên</label>
+                <input type="text" id="user-name" placeholder="Nhập họ tên đầy đủ..." 
+                    class="w-full px-4 py-3.5 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-100 focus:border-blue-600 outline-none transition-all text-base font-semibold text-slate-800 placeholder-slate-400">
+            </div>
+
+            <div>
+                <label class="block text-xs font-extrabold text-slate-500 mb-2 uppercase tracking-wider">Số lượng câu hỏi ôn tập</label>
+                <select id="mode-select" class="w-full px-4 py-3.5 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-100 focus:border-blue-600 outline-none transition-all text-base font-bold text-slate-800 bg-white">
+                    <option value="80">Trọn bộ Ngân hàng 80 câu (Khuyên dùng)</option>
+                    <option value="50">Bộ 50 câu trọng tâm</option>
+                    <option value="30">Bộ 30 câu ngẫu nhiên</option>
+                </select>
+            </div>
+
+            <button onclick="startQuiz()" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-extrabold py-4 rounded-xl shadow-xl shadow-blue-600/30 transition-all text-base tracking-wide uppercase mt-2">
+                BẮT ĐẦU ÔN TẬP
+            </button>
+        </div>
+        
+        <div class="mt-6 pt-4 border-t border-slate-200/60 text-center">
+            <p class="text-[11px] font-medium text-slate-400">Tác giả & Hỗ trợ: <strong class="text-slate-600">Dũng Trần</strong> (Zalo: <span class="text-blue-600 font-bold">Admin</span>)</p>
+        </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz-screen" class="hidden max-w-2xl w-full glass-morphism p-5 sm:p-8 rounded-3xl shadow-2xl relative animate-pop my-4">
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-200 h-2 rounded-full mb-6 overflow-hidden">
+            <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300 w-0"></div>
+        </div>
+
+        <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+            <div>
+                <span id="question-counter" class="text-xs font-black text-blue-700 bg-blue-100/80 px-3.5 py-1.5 rounded-full uppercase tracking-wider">Câu 1</span>
+                <span id="display-name" class="ml-2 text-xs sm:text-sm font-bold text-slate-600"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div id="timer" class="text-sm font-black font-mono text-slate-600">00:00</div>
+            </div>
+        </div>
+
+        <div id="question-container">
+            <h2 id="question-text" class="text-base sm:text-lg font-bold text-slate-900 mb-6 leading-snug"></h2>
+            <div id="options-container" class="grid grid-cols-1 gap-3"></div>
+            
+            <!-- Explanation Box -->
+            <div id="explanation-box" class="hidden mt-5 p-4 rounded-2xl bg-blue-50/90 border border-blue-200/80 text-slate-700 text-sm leading-relaxed animate-pop">
+                <div class="font-extrabold text-blue-900 mb-1 flex items-center gap-1.5 text-xs uppercase tracking-wider">
+                    <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Giải thích & Quy định liên quan:
+                </div>
+                <div id="explanation-text" class="text-xs sm:text-sm font-medium text-slate-800"></div>
+            </div>
+        </div>
+
+        <div class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-slate-100">
+            <div id="feedback" class="text-sm font-bold italic text-slate-700 w-full sm:w-auto text-center sm:text-left"></div>
+            <button id="next-btn" onclick="nextQuestion()" class="hidden w-full sm:w-auto bg-slate-900 hover:bg-black text-white px-8 py-3.5 rounded-xl font-extrabold transition-all shadow-lg active:scale-95 text-sm uppercase tracking-wider">
+                TIẾP THEO ➔
+            </button>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="result-screen" class="hidden max-w-2xl w-full glass-morphism p-6 sm:p-8 rounded-3xl shadow-2xl animate-pop my-4 flex flex-col md:flex-row gap-8">
+        
+        <!-- Left Side: Result Summary -->
+        <div class="flex-1 text-center">
+            <div class="mb-6">
+                <div id="result-icon" class="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-3 shadow-inner"></div>
+                <h2 class="text-2xl font-black text-slate-900" id="result-title">Kết quả</h2>
+                <p id="final-score-display" class="text-5xl font-black text-blue-600 my-3 tracking-tight"></p>
+                <p id="final-username" class="text-xs sm:text-sm text-slate-500 font-bold"></p>
+            </div>
+            
+            <div id="summary-msg" class="bg-blue-50/80 text-blue-900 p-4 rounded-2xl mb-6 text-xs sm:text-sm font-semibold leading-relaxed border border-blue-200/80"></div>
+
+            <div class="space-y-3">
+                <button onclick="sendResult()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex flex-col items-center justify-center">
+                    <span class="text-sm uppercase tracking-wider">GỬI KẾT QUẢ CHO ADMIN</span>
+                    <span class="text-[11px] font-medium opacity-90 mt-0.5">Zalo Admin (Tự động Copy & Mở Zalo)</span>
+                </button>
+                <button onclick="location.reload()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl transition-all text-sm">
+                    LÀM LẠI TỪ ĐẦU
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Side: Leaderboard -->
+        <div class="flex-1 border-t md:border-t-0 md:border-l border-slate-200 pt-6 md:pt-0 md:pl-6">
+            <h3 class="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                Hoàn thành gần đây
+            </h3>
+            <div id="leaderboard-list" class="space-y-3 max-h-[350px] overflow-y-auto custom-scrollbar pr-2">
+                <div class="text-center text-sm text-slate-400 py-4">Đang tải dữ liệu...</div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration setup - Handle environment variables
+        let firebaseConfig = {};
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dntu-khao-thi-quiz';
+        
+        try {
+            if (typeof __firebase_config !== 'undefined') {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } else {
+                // Mock configuration for local testing if needed
+                 firebaseConfig = {
+                    apiKey: "mock-key",
+                    authDomain: "mock-domain",
+                    projectId: "mock-project",
+                };
+            }
+        } catch (e) {
+            console.error("Error parsing firebase config", e);
+        }
+
+        let app, db, auth, user;
+
+        try {
+             app = initializeApp(firebaseConfig);
+             db = getFirestore(app);
+             auth = getAuth(app);
+        } catch (e) {
+             console.error("Firebase init failed", e);
+        }
+
+
+        document.getElementById('branding-login').innerText = ADMIN_FULL_BRANDING;
+        
+        // Ngân hàng câu hỏi (đã cập nhật câu 80)
+        const rawBank = [
+            { q: "Thời hạn nhập điểm quá trình lên hệ thống sau khi kết thúc học phần?", o: ["03 ngày", "05 ngày", "07 ngày", "10 ngày"], c: 0, exp: "Theo quy định khảo thí DNTU, giảng viên có tối đa 03 ngày kể từ ngày kết thúc học phần để nhập điểm quá trình lên phần mềm." },
+            { q: "Công thức điểm quá trình (ĐQT) lý thuyết thông thường?", o: ["50% TX + 50% GK", "30% TX + 20% GK", "40% TX + 10% GK", "25% TX + 25% GK"], c: 1, exp: "Điểm quá trình các môn lý thuyết được cấu thành từ 30% điểm Thường xuyên (TX) và 20% điểm Giữa kỳ (GK)." },
+            { q: "Thời hạn nhập điểm thi không tập trung (Tiểu luận/Đồ án)?", o: ["07 ngày", "10 ngày", "14 ngày", "21 ngày"], c: 2, exp: "Bài thi không tập trung (Tiểu luận/Đồ án) được cho thời hạn tối đa 14 ngày để chấm và cập nhật điểm lên hệ thống." },
+            { q: "Tỷ lệ độ khó (Dễ - TB - Khó) chuẩn của ngân hàng đề thi DNTU?", o: ["40-40-20", "30-50-20", "50-30-20", "20-60-20"], c: 1, exp: "Ngân hàng câu hỏi trắc nghiệm phải đảm bảo cấu trúc: 30% câu dễ, 50% câu trung bình và 20% câu phân hóa khó." },
+            { q: "Sinh viên vắng thi có lý do nộp đơn xin hoãn thi trong thời hạn nào?", o: ["01 ngày làm việc", "02 ngày làm việc", "03 ngày làm việc", "05 ngày làm việc"], c: 2, exp: "Sinh viên phải nộp đơn xin hoãn thi kèm minh chứng hợp lệ trong vòng 03 ngày làm việc kể từ ngày vắng thi." },
+            { q: "Phòng nhận và bàn giao bài thi tự luận tại DNTU?", o: ["G201", "G209", "G101", "G305"], c: 1, exp: "Văn phòng Phòng Khảo thí & ĐBCL nằm tại phòng G209 (nhà G), là nơi giao và nhận toàn bộ bài thi tự luận." },
+            { q: "Sinh viên quên thẻ sinh viên cần bổ sung giấy tờ tùy thân trong?", o: ["12 giờ", "24 giờ", "48 giờ", "72 giờ"], c: 1, exp: "Cán bộ coi thi cho phép SV làm cam đoan và yêu cầu bổ sung giấy tờ tùy thân có ảnh trong vòng 24 giờ." },
+            { q: "Hồ sơ minh chứng quá trình phải tải lên hệ thống NAS trong?", o: ["03 ngày", "05 ngày", "07 ngày", "10 ngày"], c: 2, exp: "Thời hạn quy định để đơn vị/giảng viên quét và tải minh chứng đánh giá quá trình lên máy chủ NAS là 07 ngày." },
+            { q: "Thi trắc nghiệm khách quan đánh giá chủ yếu các cấp độ Bloom nào?", o: ["Nhớ, Hiểu, Vận dụng", "Phân tích, Đánh giá", "Sáng tạo, Đánh giá", "Tất cả các cấp độ"], c: 0, exp: "Hình thức trắc nghiệm phù hợp nhất để đánh giá 3 cấp độ tư duy đầu tiên: Nhớ, Hiểu và Vận dụng." },
+            { q: "Điểm học phần (thang điểm 10) được quy định làm tròn đến?", o: ["0 chữ số", "1 chữ số thập phân", "2 chữ số thập phân", "3 chữ số thập phân"], c: 1, exp: "Quy chế đào tạo DNTU quy định làm tròn điểm thi và điểm tổng kết đến 1 chữ số thập phân (ví dụ: 7.45 -> 7.5)." },
+            { q: "Cán bộ coi thi (CBCT) phải có mặt tại địa điểm thi trước giờ thi?", o: ["10 phút", "15 phút", "20 phút", "30 phút"], c: 1, exp: "CBCT cần tập trung trước 15 phút để nhận túi đề thi, danh sách thi và nghe phổ biến công tác tổ chức thi." },
+            { q: "Mỗi phòng thi tập trung thông thường bố trí bao nhiêu CBCT?", o: ["1 cán bộ", "2 cán bộ", "3 cán bộ", "Tùy số lượng SV"], c: 1, exp: "Theo tiêu chuẩn phòng thi tập trung, mỗi phòng thi được bố trí tối thiểu 02 cán bộ coi thi để đảm bảo tính nghiêm túc." },
+            { q: "Trường hợp sinh viên bị đình chỉ thi thì điểm học phần ghi nhận là?", o: ["0 điểm (F)", "Bỏ trống", "Hủy kết quả", "Vắng thi"], c: 0, exp: "SV vi phạm quy chế mức đình chỉ thi nhận 0 điểm cho học phần đó và phải học lại." },
+            { q: "Sinh viên đi trễ quá bao nhiêu phút từ khi phát đề không được dự thi?", o: ["10 phút", "15 phút", "20 phút", "30 phút"], c: 1, exp: "SV đến chậm quá 15 phút sau khi bắt đầu phát đề thi sẽ không được quyền tham dự ca thi đó." },
+            { q: "Hình thức đánh giá 'Tiểu luận' bắt buộc phải kèm minh chứng nào?", o: ["Bảng điểm tay", "Phiếu chấm Rubric", "Đề cương chi tiết", "Ảnh chụp bài làm"], c: 1, exp: "Hình thức thi tiểu luận/đồ án bắt buộc phải có Phiếu chấm tiêu chí Rubric chi tiết đi kèm minh chứng." },
+            { q: "Dụng cụ bắt buộc khi làm bài thi trắc nghiệm trên giấy?", o: ["Bút mực xanh", "Bút bi đen", "Bút chì", "Bút dạ quang"], c: 2, exp: "Sinh viên tô phiếu trắc nghiệm bằng bút chì (như 2B) để máy quét quang học OMR nhận diện chính xác." },
+            { q: "Giảng viên có được phép mang bài thi tự luận về nhà chấm không?", o: ["Có, nếu báo Khoa", "Có, nếu bài ít", "Tuyệt đối không", "Chỉ chấm tiểu luận"], c: 2, exp: "Giảng viên tuyệt đối không được mang bài thi ra khỏi khu vực quy định của nhà trường (chấm tại G209 hoặc phòng tập trung)." },
+            { q: "Thang điểm 4: Mức điểm chữ 'C' tương ứng với bao nhiêu điểm?", o: ["1.5", "2.0", "2.5", "3.0"], c: 1, exp: "Quy đổi thang điểm 4: A = 4.0, B = 3.0, C = 2.0, D = 1.0, F = 0." },
+            { q: "Sinh viên muốn phúc khảo bài thi nộp đơn trực tiếp tại đâu?", o: ["Khoa chuyên môn", "Phòng Đào tạo", "Phòng Khảo thí & ĐBCL", "Văn phòng Đoàn"], c: 2, exp: "Mọi đơn từ và lệ phí phúc khảo bài thi do Phòng Khảo thí & ĐBCL tiếp nhận và xử lý." },
+            { q: "Cán bộ coi thi có được dùng điện thoại cá nhân trong phòng thi không?", o: ["Có, để xem giờ", "Có, để liên lạc", "Tuyệt đối không", "Chỉ dùng khi khẩn cấp"], c: 2, exp: "CBCT tuyệt đối không sử dụng thiết bị viễn thông, điện thoại trong suốt thời gian coi thi." },
+            { q: "Thời gian lưu trữ bài thi tự luận tối thiểu tại trường?", o: ["1 năm", "2 năm", "Theo quy định hiện hành", "5 năm"], c: 2, exp: "Bài thi viết/tự luận được Phòng Khảo thí lưu trữ theo thời hạn quy định trong văn bản hướng dẫn hiện hành." },
+            { q: "Sinh viên đạt 7.5 điểm (thang 10) tổng kết xếp loại học lực gì?", o: ["Trung bình", "Khá", "Giỏi", "Xuất sắc"], c: 1, exp: "Mức điểm Khá nằm trong khoảng từ 7.0 đến 8.4 trên thang điểm 10." },
+            { q: "Khi phát hiện sự cố/lỗi trong đề thi tại phòng thi, CBCT báo cho?", o: ["Trưởng khoa", "Phòng Khảo thí", "Giảng viên ra đề", "Phòng Đào tạo"], c: 1, exp: "CBCT giữ nguyên vị trí, nhanh chóng thông báo cho Cán bộ giám thị hành lang / Phòng Khảo thí để xử lý." },
+            { q: "Quét (scan) minh chứng bài thi/điểm lên NAS là trách nhiệm của?", o: ["Phòng Khảo thí", "Phòng Đào tạo", "Giảng viên/Đơn vị CM", "Sinh viên"], c: 2, exp: "Giảng viên phụ trách môn học và Đơn vị chuyên môn chịu trách nhiệm tạo và tải file minh chứng lên NAS." },
+            { q: "Văn phòng Phòng Khảo thí DNTU nằm ở dãy nhà nào?", o: ["Nhà A", "Nhà B", "Nhà G", "Nhà C"], c: 2, exp: "Phòng Khảo thí & ĐBCL DNTU tọa lạc tại Tầng 2, Nhà G (Phòng G209)." },
+            { q: "Điểm chữ 'D' tương ứng khoảng điểm thang 10 nào?", o: ["0.0 - 3.9", "4.0 - 5.4", "5.5 - 6.9", "7.0 - 8.4"], c: 1, exp: "Điểm D (đạt) nằm trong dải từ 4.0 đến 5.4 điểm hệ 10." },
+            { q: "Cần làm gì khi giảng viên nhập nhầm điểm sau khi đã khóa hệ thống?", o: ["Tự mở khóa", "Báo CNTT", "Lập đơn/biên bản xin sửa điểm", "Bỏ qua"], c: 2, exp: "Giảng viên phải làm biên bản giải trình kèm minh chứng trình Trưởng đơn vị và Phòng Khảo thí phê duyệt." },
+            { q: "Hành vi nhắc bài hoặc trao đổi bài trong phòng thi bị lập biên bản?", o: ["Đình chỉ ngay", "Trừ 50% điểm", "Nhắc nhở / Cảnh cáo", "Hủy bài thi"], c: 2, exp: "Lần đầu vi phạm nhắc nhở, tiếp tục vi phạm sẽ bị lập biên bản cảnh cáo trừ % điểm theo quy chế." },
+            { q: "File minh chứng bài thi/hồ sơ scan lên NAS nên để định dạng nào?", o: ["Word", "JPEG", "PDF", "Excel"], c: 2, exp: "Định dạng PDF chuẩn giúp bảo toàn định dạng văn bản và minh chứng rõ ràng." },
+            { q: "Chấm thi vấn đáp có bắt buộc ghi lại nội dung trả lời vào phiếu chấm?", o: ["Không cần", "Chỉ ghi điểm", "Có, ghi tóm tắt ý trả lời", "Chỉ ghi điểm chữ"], c: 2, exp: "Giảng viên chấm vấn đáp phải ghi rõ nhận xét tóm tắt nội dung trả lời của SV vào phiếu chấm." },
+            { q: "Nộp túi bài thi tự luận về G209 sau khi kết thúc ca thi trong thời gian?", o: ["Trong ngày", "Sau 24 giờ", "Ngay sau khi kết thúc ca thi", "Trước ca thi tiếp"], c: 2, exp: "CBCT bàn giao bài thi, đề thi thừa và hồ sơ phòng thi về G209 ngay sau khi hết giờ thi ca đó." },
+            { q: "Phần mềm quản lý đào tạo và điểm chính thức hiện nay của DNTU?", o: ["Excel", "Google Sheets", "PSC / Portal DNTU", "Moodle"], c: 2, exp: "Hệ thống PSC / Portal tích hợp là kênh chính thức nhập và quản lý điểm số toàn trường." },
+            { q: "Sinh viên bị bệnh trước ca thi cần xin giấy tờ xác nhận ở đâu?", o: ["Trạm xá xã", "Cơ sở y tế / Bệnh viện", "Giảng viên chủ nhiệm", "Gia đình"], c: 1, exp: "Minh chứng tạm hoãn thi phải do cơ sở y tế (Bệnh viện quận/huyện trở lên hoặc trạm y tế hợp lệ) chứng nhận." },
+            { q: "Kỳ thi phụ (thi vét / thi hoãn) thường diễn ra khi nào?", o: ["Hàng tuần", "Cuối mỗi học kỳ", "Giữa học kỳ", "Đầu mỗi năm học"], c: 1, exp: "Nhà trường tổ chức kỳ thi phụ sau mỗi học kỳ chính cho các sinh viên hoãn thi hợp lệ." },
+            { q: "Số lượng câu hỏi Dễ chiếm tỷ lệ bao nhiêu trong ngân hàng đề trắc nghiệm?", o: ["20%", "30%", "40%", "50%"], c: 1, exp: "Theo chuẩn 30% Dễ - 50% Trung bình - 20% Khó." },
+            { q: "Tỷ lệ câu hỏi phân loại Khó trong ngân hàng đề trắc nghiệm?", o: ["10%", "20%", "30%", "40%"], c: 1, exp: "Mức độ Khó chiếm đúng 20% tổng số câu hỏi trong ngân hàng." },
+            { q: "Thí sinh tô 2 đáp án cho cùng 1 câu trắc nghiệm trên phiếu OMR sẽ?", o: ["Tính đáp án A", "Tính đáp án đúng", "Không được tính điểm câu đó", "Trừ điểm câu đúng"], c: 2, exp: "Tô 2 đáp án bị coi là không hợp lệ và máy quét tự động bỏ qua không tính điểm câu đó." },
+            { q: "01 tín chỉ lý thuyết quy đổi bao nhiêu tiết dạy trên lớp?", o: ["10 tiết", "15 tiết", "30 tiết", "45 tiết"], c: 1, exp: "01 tín chỉ lý thuyết tương ứng 15 tiết học trên lớp tại DNTU." },
+            { q: "Mức điểm tổng kết đạt loại 'Giỏi' (thang 10) từ bao nhiêu điểm?", o: ["8.0", "8.5", "9.0", "7.5"], c: 1, exp: "Loại Giỏi tính từ 8.5 đến 8.9 (thang 10) hoặc 3.2 đến 3.59 (thang 4)." },
+            { q: "Số loại minh chứng chính trong hồ sơ thi không tập trung (Tiểu luận)?", o: ["2 loại", "3 loại", "4 loại", "5 loại"], c: 2, exp: "Gồm 4 loại: Đề thi, Đáp án/Rubric, Bảng điểm, Bài làm của sinh viên kèm phiếu chấm." },
+            { q: "Đề thi trắc nghiệm khi nộp về phòng Khảo thí bắt buộc kèm theo?", o: ["Danh sách SV", "Đáp án và Ma trận đề", "Bài giảng", "Sách tham khảo"], c: 1, exp: "Nộp đề trắc nghiệm bắt buộc đi kèm file Đáp án chuẩn và Ma trận phân bổ cấu trúc đề." },
+            { q: "SV bị đình chỉ thi môn A có được dự thi môn B tiếp theo không?", o: ["Tuyệt đối không", "Có, vẫn được thi môn B", "Tùy ý CBCT", "Hủy toàn bộ kỳ thi"], c: 1, exp: "Đình chỉ thi áp dụng cho từng học phần vi phạm, SV vẫn được thi các học phần khác bình thường." },
+            { q: "Nơi nhận túi bài thi tự luận để giảng viên mang đến phòng chấm?", o: ["Văn phòng Khoa", "Phòng Đào tạo", "Phòng G209 (Khảo thí)", "Phòng Hành chính"], c: 2, exp: "Giảng viên ký nhận bài thi trực tiếp tại Phòng G209 và chấm tại vị trí quy định." },
+            { q: "Tên thư mục/file tải lên hệ thống NAS tuân thủ theo?", o: ["Tên tự do", "Hướng dẫn cấu trúc của Trường / CNTT", "Mã số thuế", "Ngày tháng năm"], c: 1, exp: "Phải đặt theo đúng quy chuẩn cấu trúc mã lớp, mã học phần do nhà trường hướng dẫn." },
+            { q: "Hậu kiểm hồ sơ NAS của Phòng Khảo thí dựa trên tiêu chí?", o: ["Kích thước file", "Tính đầy đủ, chính xác, khớp với Portal", "Số lượng folder", "Tốc độ mạng"], c: 1, exp: "Đánh giá tính đầy đủ của minh chứng và sự khớp đúng giữa bảng điểm ký và điểm trên Portal." },
+            { q: "Đơn vị phê duyệt công bố điểm chính thức cho SV trên Portal?", o: ["Giảng viên", "Trưởng khoa", "Phòng Khảo thí & ĐBCL", "Hiệu trưởng"], c: 2, exp: "Phòng Khảo thí kiểm tra hồ sơ và duyệt khóa điểm công bố chính thức." },
+            { q: "Bút chì loại nào phù hợp nhất để tô phiếu trắc nghiệm?", o: ["Bút chì HB", "Bút chì 2B", "Bút chì 6B", "Bút chì màu"], c: 1, exp: "Chì 2B có độ đậm vừa phải, không làm lem bẩn giấy và giúp máy nhận dạng tối ưu." },
+            { q: "Mức độ 'Sáng tạo' trong thang Bloom có dùng trong thi trắc nghiệm không?", o: ["Dùng rất nhiều", "Rất hạn chế / Không phù hợp", "Bắt buộc 50%", "Môn nào cũng có"], c: 1, exp: "Cấp độ Sáng tạo đòi hỏi tự do thiết kế/tạo mới nên trắc nghiệm đóng khó đánh giá được." },
+            { q: "Giảng viên ra đề thi có phải ký cam kết bảo mật đề thi không?", o: ["Không cần", "Tùy môn", "Bắt buộc", "Chỉ giảng viên thỉnh giảng"], c: 2, exp: "Mọi giảng viên tham gia ra đề đều phải bảo mật tuyệt đối nội dung đề thi theo quy định." },
+            { q: "Địa điểm G209 chức năng chính là gì?", o: ["Phòng tiếp SV", "Bàn giao đề/bài thi & Nghiệp vụ Khảo thí", "Phòng máy vi tính", "Hội trường"], c: 1, exp: "G209 là trung tâm điều hành bàn giao bài thi và xử lý nghiệp vụ khảo thí." },
+            { q: "Trường hợp đề thi có câu hỏi bị sai sót nội dung, điểm câu đó xử lý?", o: ["Thưởng điểm tối đa câu đó cho tất cả SV", "Hủy bỏ ca thi", "Trừ điểm bài làm", "Không làm gì"], c: 0, exp: "Theo thông lệ khảo thí, nếu câu hỏi lỗi do phía ra đề, tất cả SV trong ca thi được cộng điểm tối đa câu đó." },
+            { q: "Thời gian tối đa được ra khỏi phòng thi đối với thi tự luận?", o: ["1/3 thời gian", "Sau 2/3 thời gian làm bài", "Sau 10 phút", "Không được ra"], c: 1, exp: "SV chỉ được ra khỏi phòng thi sau khi đã qua 2/3 thời gian làm bài thi tự luận." },
+            { q: "Đối với thi trắc nghiệm, sinh viên có được rời phòng thi sớm không?", o: ["Được ra bất kỳ lúc nào", "Không được rời phòng thi trong suốt giờ làm bài", "Sau 15 phút", "Sau nửa thời gian"], c: 1, exp: "Môn trắc nghiệm yêu cầu SV không ra khỏi phòng thi cho đến khi hết giờ và thu đủ bài." },
+            { q: "CBCT thu bài thi tự luận phải kiểm tra kỹ chi tiết nào?", o: ["Số tờ giấy thi và chữ ký của SV", "Màu mực", "Quê quán SV", "Điểm quá trình"], c: 0, exp: "CBCT bắt buộc đếm đúng số tờ bài làm và kiểm tra SV đã ký tên vào danh sách nộp bài." },
+            { q: "Trách nhiệm ra ma trận đề thi thuộc về ai?", o: ["Phòng Khảo thí", "Giảng viên/Tổ bộ môn phụ trách học phần", "Sinh viên", "Phòng Đào tạo"], c: 1, exp: "Giảng viên giảng dạy và tổ bộ môn xây dựng ma trận đề đáp ứng chuẩn đầu ra (CDR) học phần." },
+            { q: "Mỗi học phần thi tập trung cần chuẩn bị tối thiểu bao nhiêu đề thi?", o: ["01 đề", "Tối thiểu 02 đề chẵn/lẻ (hoặc nhiều mã đề)", "05 đề", "10 đề"], c: 1, exp: "Thi tự luận tối thiểu có 2 đề (Đề A - Đề B), thi trắc nghiệm đảo thành nhiều mã đề." },
+            { q: "Thang điểm chữ có mấy mức xếp loại cơ bản?", o: ["4 mức (A,B,C,D)", "5 mức (A,B,C,D,F)", "6 mức", "10 mức"], c: 1, exp: "Thang điểm chữ gồm 5 mức chính: A (Xuất sắc/Giỏi), B (Khá), C (Trung bình), D (Trung bình yếu), F (Kém/Rớt)." },
+            { q: "Sinh viên có điểm học phần bao nhiêu thì bị xếp loại điểm F?", o: ["Dưới 4.0", "Dưới 5.0", "Dưới 3.5", "Dưới 4.5"], c: 0, exp: "Thang điểm 10 dưới 4.0 tương ứng loại F (Không đạt học phần)." },
+            { q: "Đồ án tốt nghiệp / Khóa luận tốt nghiệp do ai chấm?", o: ["1 giảng viên", "Hội đồng đánh giá do Trường thành lập", "Phòng Khảo thí", "Lớp trưởng"], c: 1, exp: "Đánh giá đồ án/khóa luận do Hội đồng chuyên môn thực hiện theo quy định." },
+            { q: "Thời hạn lưu trữ đề thi, đáp án tại Phòng Khảo thí?", o: ["01 năm", "Lưu vĩnh viễn / Theo quy định lưu trữ", "06 tháng", "02 năm"], c: 1, exp: "Ngân hàng đề và đáp án được bảo mật và lưu trữ lâu dài trong hệ thống dữ liệu nhà trường." },
+            { q: "Khi chấm bài tự luận, CBCT 1 và CBCT 2 phải?", o: ["Chấm độc lập", "Chấm chung 1 lượt", "Một người chấm một người duyệt", "Để SV tự chấm"], c: 0, exp: "Quy trình chuẩn yêu cầu 2 cán bộ chấm thi độc lập trên phiếu chấm hoặc ghi điểm riêng trước khi thống nhất." },
+            { q: "Giảng viên chấm bài phát hiện có dấu hiệu đánh dấu bài thi thì xử lý?", o: ["Tự trừ điểm", "Giao bài cho Trưởng bộ môn/Phòng Khảo thí xử lý", "Xé bài", "Cho 0 điểm ngay"], c: 1, exp: "Báo cáo vị phạm về Phòng Khảo thí để lập hội đồng xử lý đúng thẩm quyền." },
+            { q: "Chữ ký của sinh viên trên danh sách dự thi dùng để làm gì?", o: ["Trang trí", "Xác nhận sự có mặt và nộp đủ bài thi", "Điểm danh hộ", "Tính điểm cộng"], c: 1, exp: "Là minh chứng pháp lý xác nhận SV có mặt và đã bàn giao bài làm cho CBCT." },
+            { q: "Trường hợp sinh viên làm bài thi trắc nghiệm bằng bút mực trên phiếu OMR?", o: ["Máy quét không chấm được / Lỗi bài", "Vẫn chấm bình thường", "Được cộng điểm", "CBCT tô lại giúp"], c: 0, exp: "Viết bút mực làm hỏng phiếu trắc nghiệm OMR và máy quét quang học bỏ qua." },
+            { q: "Hình thức thi Thực hành trên máy tính cần lưu trữ minh chứng gì?", o: ["File bài làm SV + Bảng điểm + Đề thi", "Chỉ cần bảng điểm", "Hình chụp máy tính", "Không cần lưu"], c: 0, exp: "Cần lưu file dữ liệu bài làm của SV tập trung vào thư mục/máy chủ quy định." },
+            { q: "Giảng viên nhập điểm trễ so với quy định sẽ bị xử lý thế nào?", o: ["Nhắc nhở / Tính vào đánh giá thi đua KPI", "Không phạt", "Trừ lương ngay", "Cấm giảng dạy"], c: 0, exp: "Việc chậm trễ nhập điểm ảnh hưởng tiến độ đào tạo và bị trừ điểm thi đua cán bộ/giảng viên." },
+            { q: "Quy trình phúc khảo bài thi trắc nghiệm được thực hiện bằng cách?", o: ["Rút bài thi chấm tay lại đối chiếu phiếu", "Giảng viên tự sửa", "Cho SV làm lại bài", "Tăng 1 điểm"], c: 0, exp: "Rút phiếu trả lời trắc nghiệm gốc, kiểm tra mã đề, chấm tay đối chiếu với đáp án chuẩn." },
+            { q: "Tỷ lệ tham dự lớp tối thiểu để sinh viên được dự thi cuối kỳ?", o: ["50%", "80% (hoặc theo quy định HP)", "100%", "60%"], c: 1, exp: "SV phải đảm bảo chuyên cần (thường từ 80% thời lượng) mới đủ điều kiện dự thi kết thúc học phần." },
+            { q: "Khi sinh viên xin hoãn thi hợp lệ, điểm học phần hiện trên hệ thống tạm thời là?", o: ["I (Incomplete - Hoãn thi)", "F", "0", "Pass"], c: 0, exp: "Ký hiệu 'I' dành cho các trường hợp được chấp thuận hoãn thi hợp lệ." },
+            { q: "Hình thức thi Vấn đáp cần có tối thiểu bao nhiêu giảng viên chấm?", o: ["1 giảng viên", "2 giảng viên", "3 giảng viên", "4 giảng viên"], c: 1, exp: "Thi vấn đáp bắt buộc bố trí 02 giảng viên cùng chấm độc lập và thống nhất điểm." },
+            { q: "Bảng điểm chấm thi tự luận sau khi hoàn hoàn thành phải có chữ ký của?", o: ["Cả 2 giảng viên chấm thi", "1 giảng viên", "SV đại diện", "Lớp trưởng"], c: 0, exp: "Cả 2 giảng viên tham gia chấm thi phải ký tên ghi rõ họ tên trên bảng điểm." },
+            { q: "Mã số đề thi trắc nghiệm do ai tạo ra?", o: ["Phòng Khảo thí / Phần mềm xáo đề", "SV tự chọn", "CBCT tự ghi", "Trưởng khoa"], c: 0, exp: "Phần mềm trộn đề thi tự động của Phòng Khảo thí tạo mã đề ngẫu nhiên." },
+            { q: "Sinh viên đến thi muộn dưới 15 phút thì xử lý thế nào?", o: ["Cho vào thi nhưng không bù thời gian làm bài", "Đuổi về", "Cộng thêm 15 phút", "Lập biên bản vi phạm"], c: 0, exp: "SV được vào làm bài ngay nhưng phải nộp bài cùng giờ với cả phòng thi." },
+            { q: "Danh sách sinh viên cấm thi do đơn vị nào duyệt công bố?", o: ["Giảng viên môn học đề xuất, Khoa/Phòng Đào tạo duyệt", "SV tự đăng ký", "CBCT", "Bảo vệ"], c: 0, exp: "Giảng viên chốt danh sách vắng quá quy định và báo Khoa/Đào tạo ra thông báo cấm thi." },
+            { q: "Ai là người có thẩm quyền ký giấy hoãn thi cho sinh viên?", o: ["Ban Giám hiệu / Phòng Khảo thí & ĐBCL", "Lớp trưởng", "Bảo vệ", "Giảng viên dạy lớp"], c: 0, exp: "Phòng Khảo thí & ĐBCL tiếp nhận đơn trình Lãnh đạo phê duyệt hoãn thi." },
+            { q: "Bộ chứng từ thanh toán giờ chấm thi bắt buộc có minh chứng nào?", o: ["Bảng điểm ký tên + Quyết định / Lịch phân công", "Chỉ cần hóa đơn", "Ảnh chụp bài thi", "Giấy giới thiệu"], c: 0, exp: "Phải kèm bảng điểm gốc đã chấm có đầy đủ chữ ký và quyết định phân công liên quan." },
+            { q: "Sổ tay Giảng viên DNTU cung cấp thông tin gì?", o: ["Toàn bộ quy trình, quy định giảng dạy và khảo thí", "Chỉ có sơ đồ trường", "Thời khóa biểu SV", "Thực đơn nhà ăn"], c: 0, exp: "Cung cấp đầy đủ hướng dẫn nghiệp vụ chuyên môn cho toàn thể GV." },
+            { q: "Khi kết thúc ca thi, CBCT phải niêm phong túi bài thi trước mặt ai?", o: ["Đại diện sinh viên hoặc CBCT thứ 2", "Bảo vệ", "Một mình", "Không cần niêm phong"], c: 0, exp: "Niêm phong túi bài thi công khai có xác nhận chữ ký giữa 2 CBCT." },
+            { q: "Trách nhiệm bảo mật ngân hàng câu hỏi thuộc về?", o: ["Toàn thể Cán bộ, Giảng viên liên quan", "Chỉ cán bộ IT", "Chỉ sinh viên", "Không cần bảo mật"], c: 0, exp: "Là tài sản trí tuệ và bảo mật cao cấp của nhà trường, mọi cá nhân phải giữ bí mật." },
+            { q: "Bạn có sẵn sàng mời Admin ly cafe không?", o: ["Có", "Không", "Lưỡng lự", "Tất nhiên rồi"], c: 3, exp: "Cảm ơn bạn! Sự ủng hộ của bạn là động lực rất lớn." } // CÂU 80 MỚI
+        ];
+
+        let questions = [];
+        let currentIdx = 0;
+        let score = 0;
+        let startTime, endTime;
+        let userName = "";
+        let selectedCoffeeOption = "";
+
+        window.startQuiz = async function() {
+            const input = document.getElementById('user-name');
+            if (input.value.trim() === "") {
+                alert("Vui lòng nhập Họ và Tên của bạn để ghi nhận kết quả!");
+                return;
+            }
+            userName = input.value.trim();
+            
+            // Login to Firebase Anonymously if not already
+            if (auth && !auth.currentUser) {
+                try {
+                    await signInAnonymously(auth);
+                } catch(e) {
+                    console.error("Auth failed, continuing without saving", e);
+                }
+            }
+            
+            const count = parseInt(document.getElementById('mode-select').value);
+            
+            // Tách câu hỏi 80 ra khỏi việc xáo trộn chung
+            const regularQuestions = rawBank.slice(0, rawBank.length - 1); // 79 câu đầu
+            const coffeeQuestion = rawBank[rawBank.length - 1]; // Câu 80
+            
+            const shuffled = [...regularQuestions].sort(() => 0.5 - Math.random());
+            
+            // Lấy (count - 1) câu hỏi ngẫu nhiên và đảm bảo câu 80 luôn ở cuối
+            questions = shuffled.slice(0, Math.min(count - 1, regularQuestions.length));
+            questions.push(coffeeQuestion); 
+            
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('display-name').innerText = `| GV: ${userName}`;
+            
+            startTime = new Date();
+            updateTimer();
+            loadQuestion();
+        }
+
+        function updateTimer() {
+            const timerObj = setInterval(() => {
+                if(endTime) { clearInterval(timerObj); return; }
+                const now = new Date();
+                const diff = Math.floor((now - startTime) / 1000);
+                const m = Math.floor(diff / 60).toString().padStart(2, '0');
+                const s = (diff % 60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = `${m}:${s}`;
+            }, 1000);
+        }
+
+        window.loadQuestion = function() {
+            const q = questions[currentIdx];
+            
+            // Progress Bar & Counter
+            const progressPercent = ((currentIdx) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+            document.getElementById('question-counter').innerText = `Câu ${currentIdx + 1}/${questions.length}`;
+            document.getElementById('question-text').innerText = q.q;
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = "";
+            
+            // Hide feedback & explanation
+            document.getElementById('feedback').innerText = "";
+            document.getElementById('explanation-box').classList.add('hidden');
+            document.getElementById('explanation-text').innerText = "";
+            document.getElementById('next-btn').classList.add('hidden');
+
+            q.o.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left px-4 py-3.5 rounded-xl border-2 border-slate-200/80 hover:border-blue-400 hover:bg-blue-50/60 transition-all font-semibold flex justify-between items-center group text-slate-800 text-sm sm:text-base";
+                btn.innerHTML = `<span>${opt}</span><span class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 group-hover:bg-blue-600 group-hover:text-white transition-all ml-2 flex-shrink-0">${String.fromCharCode(65+i)}</span>`;
+                btn.onclick = () => window.checkAnswer(i, btn, opt);
+                container.appendChild(btn);
+            });
+        }
+
+        window.checkAnswer = function(idx, btn, optText) {
+            const q = questions[currentIdx];
+            const correctIdx = q.c;
+            const allBtns = document.querySelectorAll('#options-container button');
+            allBtns.forEach(b => b.disabled = true);
+            
+            // Capture coffee answer if it's the last question
+            if (currentIdx === questions.length - 1) {
+                selectedCoffeeOption = optText;
+            }
+
+            if (idx === correctIdx) {
+                btn.classList.add('correct');
+                document.getElementById('feedback').innerHTML = "<span class='text-emerald-700 font-bold'>✓ Chính xác!</span>";
+                score++;
+            } else {
+                btn.classList.add('incorrect');
+                allBtns[correctIdx].classList.add('correct');
+                document.getElementById('feedback').innerHTML = "<span class='text-rose-700 font-bold'>✗ Chưa chính xác!</span>";
+            }
+
+            // Display Explanation Box
+            const expText = q.exp || "Chưa có ghi chú giải thích bổ sung cho câu hỏi này.";
+            document.getElementById('explanation-text').innerText = expText;
+            document.getElementById('explanation-box').classList.remove('hidden');
+
+            document.getElementById('next-btn').classList.remove('hidden');
+            
+            // Đổi chữ nút nếu là câu cuối
+            if (currentIdx === questions.length - 1) {
+                 document.getElementById('next-btn').innerText = "XEM KẾT QUẢ TỔNG HỢP ➔";
+            }
+        }
+
+        window.nextQuestion = function() {
+            currentIdx++;
+            if (currentIdx < questions.length) window.loadQuestion();
+            else showResult();
+        }
+
+        async function showResult() {
+            endTime = new Date();
+            const timeStr = document.getElementById('timer').innerText;
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            
+            document.getElementById('final-score-display').innerText = `${score}/${questions.length}`;
+            document.getElementById('final-username').innerText = `Học viên: ${userName} | Thời gian: ${timeStr}`;
+            
+            const icon = document.getElementById('result-icon');
+            const title = document.getElementById('result-title');
+            const msg = document.getElementById('summary-msg');
+
+            const percent = (score / questions.length) * 100;
+
+            if (percent >= 80) {
+                icon.className = "inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-3 bg-emerald-100 text-emerald-600";
+                icon.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>';
+                title.innerText = "XUẤT SẮC!";
+                msg.innerText = "Kiến thức quy định & nghiệp vụ khảo thí của bạn cực kỳ vững vàng. Chúc mừng bạn đã hoàn thành xuất sắc bài ôn tập!";
+            } else if (percent >= 50) {
+                icon.className = "inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-3 bg-blue-100 text-blue-600";
+                icon.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                title.innerText = "HOÀN THÀNH!";
+                msg.innerText = "Bạn đã nắm được hầu hết các quy trình khảo thí cơ bản. Hãy xem lại giải thích các câu sai để ghi nhớ kỹ hơn.";
+            } else {
+                icon.className = "inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-3 bg-rose-100 text-rose-600";
+                icon.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>';
+                title.innerText = "CẦN ÔN LẠI!";
+                msg.innerText = "Bạn nên dành thêm thời gian đọc lại Sổ tay Giảng viên và Quy chế Khảo thí DNTU để nắm chính xác các mốc thời gian quy định.";
+            }
+
+            // Save to Firebase Leaderboard
+            if (db && auth.currentUser) {
+                try {
+                    const resultsCol = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                    await addDoc(resultsCol, {
+                        name: userName,
+                        score: score,
+                        total: questions.length,
+                        time: timeStr,
+                        coffeeAnswer: selectedCoffeeOption || "Không trả lời",
+                        timestamp: new Date().getTime()
+                    });
+                    loadLeaderboard(); // Load after saving
+                } catch (e) {
+                    console.error("Lỗi lưu kết quả", e);
+                    document.getElementById('leaderboard-list').innerHTML = "<div class='text-sm text-rose-500'>Không thể tải bảng xếp hạng lúc này.</div>";
+                }
+            } else {
+                // Not authenticated/configured properly
+                 document.getElementById('leaderboard-list').innerHTML = "<div class='text-sm text-slate-500'>Tính năng bảng xếp hạng tạm thời không khả dụng.</div>";
+            }
+        }
+
+        function loadLeaderboard() {
+            if (!db || !auth.currentUser) return;
+            
+            const resultsCol = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+            const q = query(resultsCol); // No complex queries allowed by rules, sort in memory
+            
+            onSnapshot(q, (snapshot) => {
+                const results = [];
+                snapshot.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
+                
+                // Sort by timestamp descending (newest first) and take top 5
+                results.sort((a, b) => b.timestamp - a.timestamp);
+                const top5 = results.slice(0, 5);
+                
+                renderLeaderboard(top5);
+            }, (error) => {
+                console.error("Lỗi tải bảng xếp hạng", error);
+            });
+        }
+        
+        function renderLeaderboard(data) {
+            const listEl = document.getElementById('leaderboard-list');
+            if (data.length === 0) {
+                listEl.innerHTML = "<div class='text-sm text-slate-500 text-center py-4'>Chưa có dữ liệu.</div>";
+                return;
+            }
+            
+            let html = "";
+            data.forEach((item, index) => {
+                let badgeClass = "bg-slate-100 text-slate-600";
+                if(index === 0) badgeClass = "bg-amber-100 text-amber-600 border border-amber-200";
+                
+                // Trích xuất chữ cái đầu của tên
+                const initial = item.name.charAt(0).toUpperCase();
+                
+                html += `
+                    <div class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-white/50 hover:bg-white transition-colors">
+                        <div class="w-8 h-8 rounded-full ${badgeClass} flex items-center justify-center font-bold text-xs flex-shrink-0">
+                            ${initial}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-bold text-slate-800 truncate">${item.name}</div>
+                            <div class="text-[10px] text-slate-500 flex items-center gap-1">
+                                <span class="font-semibold text-blue-600">${item.score}/${item.total}</span>
+                                <span>•</span>
+                                <span>${item.time}</span>
+                            </div>
+                        </div>
+                        <div class="text-[10px] font-medium px-2 py-1 bg-slate-50 rounded-lg whitespace-nowrap text-slate-600 border border-slate-100" title="Câu trả lời mời cafe">
+                            ☕ ${item.coffeeAnswer}
+                        </div>
+                    </div>
+                `;
+            });
+            listEl.innerHTML = html;
+        }
+
+        window.sendResult = function() {
+            const timeStr = document.getElementById('timer').innerText;
+            const percent = Math.round((score / questions.length) * 100);
+            
+            const report = `[BÁO CÁO KẾT QUẢ ÔN TẬP KHẢO THÍ DNTU]\n` +
+                           `• Họ và tên: ${userName}\n` +
+                           `• Kết quả: ${score}/${questions.length} câu (${percent}%)\n` +
+                           `• Thời gian hoàn thành: ${timeStr}\n` +
+                           `• Câu trả lời cafe: ${selectedCoffeeOption}\n` +
+                           `• Ngày thực hiện: ${new Date().toLocaleDateString('vi-VN')}\n` +
+                           `------------------------------------\n` +
+                           `${ADMIN_FULL_BRANDING}`;
+
+            // Reliable clipboard fallback
+            const tempInput = document.createElement("textarea");
+            tempInput.value = report;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            tempInput.setSelectionRange(0, 99999); // Mobile
+            
+            try {
+                document.execCommand('copy');
+                alert("Đã tự động sao chép kết quả!\nHệ thống sẽ chuyển hướng tới Zalo của Admin để bạn dán (Paste) và gửi báo cáo.");
+            } catch (err) {
+                alert("Không thể tự động chép bộ nhớ. Hệ thống vẫn sẽ mở Zalo cho bạn!");
+            }
+            document.body.removeChild(tempInput);
+
+            // Directly open Zalo chat with Dũng Trần
+            window.open(`https://zalo.me/${ADMIN_ZALO}`, '_blank');
+        }
+    </script>
+</body>
+</html>
