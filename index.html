@@ -58,16 +58,16 @@
         <div class="space-y-4">
             <div>
                 <label class="block text-xs font-extrabold text-slate-500 mb-2 uppercase tracking-wider">Họ và tên Giảng viên / Nhân viên</label>
-                <input type="text" id="user-name" placeholder="Nhập họ tên đầy đủ..." 
+                <input type="text" id="user-name" placeholder="Nhập họ tên Quý Thầy/Cô..." 
                     class="w-full px-4 py-3.5 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-100 focus:border-blue-600 outline-none transition-all text-base font-semibold text-slate-800 placeholder-slate-400">
             </div>
 
             <div>
                 <label class="block text-xs font-extrabold text-slate-500 mb-2 uppercase tracking-wider">Số lượng câu hỏi ôn tập</label>
                 <select id="mode-select" class="w-full px-4 py-3.5 rounded-xl border border-slate-300 focus:ring-4 focus:ring-blue-100 focus:border-blue-600 outline-none transition-all text-base font-bold text-slate-800 bg-white">
-                    <option value="80">Trọn bộ Ngân hàng 80 câu (Khuyên dùng)</option>
-                    <option value="50">Bộ 50 câu trọng tâm</option>
-                    <option value="30">Bộ 30 câu ngẫu nhiên</option>
+                    <option value="100">Trọn bộ 100 câu</option>
+                    <option value="50">Bộ 50 câu</option>
+                    <option value="30">Bộ 30 câu</option>
                 </select>
             </div>
 
@@ -136,12 +136,12 @@
             <div id="summary-msg" class="bg-blue-50/80 text-blue-900 p-4 rounded-2xl mb-6 text-xs sm:text-sm font-semibold leading-relaxed border border-blue-200/80"></div>
 
             <div class="space-y-3">
-                <button onclick="sendResult()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex flex-col items-center justify-center">
-                    <span class="text-sm uppercase tracking-wider">GỬI KẾT QUẢ CHO ADMIN</span>
-                    <span class="text-[11px] font-medium opacity-90 mt-0.5">Zalo Admin (Tự động Copy & Mở Zalo)</span>
-                </button>
-                <button onclick="location.reload()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl transition-all text-sm">
-                    LÀM LẠI TỪ ĐẦU
+            <button onclick="sendResult()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex flex-col items-center justify-center">
+                <span class="text-sm uppercase tracking-wider">GỬI KẾT QUẢ CHO ADMIN</span>
+                <span class="text-[11px] font-medium opacity-90 mt-0.5">Zalo Admin (Tự động Copy & Mở Zalo)</span>
+            </button>
+            <button onclick="location.reload()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl transition-all text-sm">
+                LÀM LẠI TỪ ĐẦU
                 </button>
             </div>
         </div>
@@ -188,96 +188,123 @@
         try {
              app = initializeApp(firebaseConfig);
              db = getFirestore(app);
-             auth = getAuth(app);
-        } catch (e) {
-             console.error("Firebase init failed", e);
-        }
-
-
+    <script>
         document.getElementById('branding-login').innerText = ADMIN_FULL_BRANDING;
         
-        // Ngân hàng câu hỏi (đã cập nhật câu 80)
+        // Ngân hàng 100 câu hỏi chuyên môn + 1 câu đặc biệt
         const rawBank = [
-            { q: "Thời hạn nhập điểm quá trình lên hệ thống sau khi kết thúc học phần?", o: ["03 ngày", "05 ngày", "07 ngày", "10 ngày"], c: 0, exp: "Theo quy định khảo thí DNTU, giảng viên có tối đa 03 ngày kể từ ngày kết thúc học phần để nhập điểm quá trình lên phần mềm." },
-            { q: "Công thức điểm quá trình (ĐQT) lý thuyết thông thường?", o: ["50% TX + 50% GK", "30% TX + 20% GK", "40% TX + 10% GK", "25% TX + 25% GK"], c: 1, exp: "Điểm quá trình các môn lý thuyết được cấu thành từ 30% điểm Thường xuyên (TX) và 20% điểm Giữa kỳ (GK)." },
-            { q: "Thời hạn nhập điểm thi không tập trung (Tiểu luận/Đồ án)?", o: ["07 ngày", "10 ngày", "14 ngày", "21 ngày"], c: 2, exp: "Bài thi không tập trung (Tiểu luận/Đồ án) được cho thời hạn tối đa 14 ngày để chấm và cập nhật điểm lên hệ thống." },
-            { q: "Tỷ lệ độ khó (Dễ - TB - Khó) chuẩn của ngân hàng đề thi DNTU?", o: ["40-40-20", "30-50-20", "50-30-20", "20-60-20"], c: 1, exp: "Ngân hàng câu hỏi trắc nghiệm phải đảm bảo cấu trúc: 30% câu dễ, 50% câu trung bình và 20% câu phân hóa khó." },
-            { q: "Sinh viên vắng thi có lý do nộp đơn xin hoãn thi trong thời hạn nào?", o: ["01 ngày làm việc", "02 ngày làm việc", "03 ngày làm việc", "05 ngày làm việc"], c: 2, exp: "Sinh viên phải nộp đơn xin hoãn thi kèm minh chứng hợp lệ trong vòng 03 ngày làm việc kể từ ngày vắng thi." },
-            { q: "Phòng nhận và bàn giao bài thi tự luận tại DNTU?", o: ["G201", "G209", "G101", "G305"], c: 1, exp: "Văn phòng Phòng Khảo thí & ĐBCL nằm tại phòng G209 (nhà G), là nơi giao và nhận toàn bộ bài thi tự luận." },
-            { q: "Sinh viên quên thẻ sinh viên cần bổ sung giấy tờ tùy thân trong?", o: ["12 giờ", "24 giờ", "48 giờ", "72 giờ"], c: 1, exp: "Cán bộ coi thi cho phép SV làm cam đoan và yêu cầu bổ sung giấy tờ tùy thân có ảnh trong vòng 24 giờ." },
-            { q: "Hồ sơ minh chứng quá trình phải tải lên hệ thống NAS trong?", o: ["03 ngày", "05 ngày", "07 ngày", "10 ngày"], c: 2, exp: "Thời hạn quy định để đơn vị/giảng viên quét và tải minh chứng đánh giá quá trình lên máy chủ NAS là 07 ngày." },
-            { q: "Thi trắc nghiệm khách quan đánh giá chủ yếu các cấp độ Bloom nào?", o: ["Nhớ, Hiểu, Vận dụng", "Phân tích, Đánh giá", "Sáng tạo, Đánh giá", "Tất cả các cấp độ"], c: 0, exp: "Hình thức trắc nghiệm phù hợp nhất để đánh giá 3 cấp độ tư duy đầu tiên: Nhớ, Hiểu và Vận dụng." },
-            { q: "Điểm học phần (thang điểm 10) được quy định làm tròn đến?", o: ["0 chữ số", "1 chữ số thập phân", "2 chữ số thập phân", "3 chữ số thập phân"], c: 1, exp: "Quy chế đào tạo DNTU quy định làm tròn điểm thi và điểm tổng kết đến 1 chữ số thập phân (ví dụ: 7.45 -> 7.5)." },
-            { q: "Cán bộ coi thi (CBCT) phải có mặt tại địa điểm thi trước giờ thi?", o: ["10 phút", "15 phút", "20 phút", "30 phút"], c: 1, exp: "CBCT cần tập trung trước 15 phút để nhận túi đề thi, danh sách thi và nghe phổ biến công tác tổ chức thi." },
-            { q: "Mỗi phòng thi tập trung thông thường bố trí bao nhiêu CBCT?", o: ["1 cán bộ", "2 cán bộ", "3 cán bộ", "Tùy số lượng SV"], c: 1, exp: "Theo tiêu chuẩn phòng thi tập trung, mỗi phòng thi được bố trí tối thiểu 02 cán bộ coi thi để đảm bảo tính nghiêm túc." },
-            { q: "Trường hợp sinh viên bị đình chỉ thi thì điểm học phần ghi nhận là?", o: ["0 điểm (F)", "Bỏ trống", "Hủy kết quả", "Vắng thi"], c: 0, exp: "SV vi phạm quy chế mức đình chỉ thi nhận 0 điểm cho học phần đó và phải học lại." },
-            { q: "Sinh viên đi trễ quá bao nhiêu phút từ khi phát đề không được dự thi?", o: ["10 phút", "15 phút", "20 phút", "30 phút"], c: 1, exp: "SV đến chậm quá 15 phút sau khi bắt đầu phát đề thi sẽ không được quyền tham dự ca thi đó." },
-            { q: "Hình thức đánh giá 'Tiểu luận' bắt buộc phải kèm minh chứng nào?", o: ["Bảng điểm tay", "Phiếu chấm Rubric", "Đề cương chi tiết", "Ảnh chụp bài làm"], c: 1, exp: "Hình thức thi tiểu luận/đồ án bắt buộc phải có Phiếu chấm tiêu chí Rubric chi tiết đi kèm minh chứng." },
-            { q: "Dụng cụ bắt buộc khi làm bài thi trắc nghiệm trên giấy?", o: ["Bút mực xanh", "Bút bi đen", "Bút chì", "Bút dạ quang"], c: 2, exp: "Sinh viên tô phiếu trắc nghiệm bằng bút chì (như 2B) để máy quét quang học OMR nhận diện chính xác." },
-            { q: "Giảng viên có được phép mang bài thi tự luận về nhà chấm không?", o: ["Có, nếu báo Khoa", "Có, nếu bài ít", "Tuyệt đối không", "Chỉ chấm tiểu luận"], c: 2, exp: "Giảng viên tuyệt đối không được mang bài thi ra khỏi khu vực quy định của nhà trường (chấm tại G209 hoặc phòng tập trung)." },
-            { q: "Thang điểm 4: Mức điểm chữ 'C' tương ứng với bao nhiêu điểm?", o: ["1.5", "2.0", "2.5", "3.0"], c: 1, exp: "Quy đổi thang điểm 4: A = 4.0, B = 3.0, C = 2.0, D = 1.0, F = 0." },
-            { q: "Sinh viên muốn phúc khảo bài thi nộp đơn trực tiếp tại đâu?", o: ["Khoa chuyên môn", "Phòng Đào tạo", "Phòng Khảo thí & ĐBCL", "Văn phòng Đoàn"], c: 2, exp: "Mọi đơn từ và lệ phí phúc khảo bài thi do Phòng Khảo thí & ĐBCL tiếp nhận và xử lý." },
-            { q: "Cán bộ coi thi có được dùng điện thoại cá nhân trong phòng thi không?", o: ["Có, để xem giờ", "Có, để liên lạc", "Tuyệt đối không", "Chỉ dùng khi khẩn cấp"], c: 2, exp: "CBCT tuyệt đối không sử dụng thiết bị viễn thông, điện thoại trong suốt thời gian coi thi." },
-            { q: "Thời gian lưu trữ bài thi tự luận tối thiểu tại trường?", o: ["1 năm", "2 năm", "Theo quy định hiện hành", "5 năm"], c: 2, exp: "Bài thi viết/tự luận được Phòng Khảo thí lưu trữ theo thời hạn quy định trong văn bản hướng dẫn hiện hành." },
-            { q: "Sinh viên đạt 7.5 điểm (thang 10) tổng kết xếp loại học lực gì?", o: ["Trung bình", "Khá", "Giỏi", "Xuất sắc"], c: 1, exp: "Mức điểm Khá nằm trong khoảng từ 7.0 đến 8.4 trên thang điểm 10." },
-            { q: "Khi phát hiện sự cố/lỗi trong đề thi tại phòng thi, CBCT báo cho?", o: ["Trưởng khoa", "Phòng Khảo thí", "Giảng viên ra đề", "Phòng Đào tạo"], c: 1, exp: "CBCT giữ nguyên vị trí, nhanh chóng thông báo cho Cán bộ giám thị hành lang / Phòng Khảo thí để xử lý." },
-            { q: "Quét (scan) minh chứng bài thi/điểm lên NAS là trách nhiệm của?", o: ["Phòng Khảo thí", "Phòng Đào tạo", "Giảng viên/Đơn vị CM", "Sinh viên"], c: 2, exp: "Giảng viên phụ trách môn học và Đơn vị chuyên môn chịu trách nhiệm tạo và tải file minh chứng lên NAS." },
-            { q: "Văn phòng Phòng Khảo thí DNTU nằm ở dãy nhà nào?", o: ["Nhà A", "Nhà B", "Nhà G", "Nhà C"], c: 2, exp: "Phòng Khảo thí & ĐBCL DNTU tọa lạc tại Tầng 2, Nhà G (Phòng G209)." },
-            { q: "Điểm chữ 'D' tương ứng khoảng điểm thang 10 nào?", o: ["0.0 - 3.9", "4.0 - 5.4", "5.5 - 6.9", "7.0 - 8.4"], c: 1, exp: "Điểm D (đạt) nằm trong dải từ 4.0 đến 5.4 điểm hệ 10." },
-            { q: "Cần làm gì khi giảng viên nhập nhầm điểm sau khi đã khóa hệ thống?", o: ["Tự mở khóa", "Báo CNTT", "Lập đơn/biên bản xin sửa điểm", "Bỏ qua"], c: 2, exp: "Giảng viên phải làm biên bản giải trình kèm minh chứng trình Trưởng đơn vị và Phòng Khảo thí phê duyệt." },
-            { q: "Hành vi nhắc bài hoặc trao đổi bài trong phòng thi bị lập biên bản?", o: ["Đình chỉ ngay", "Trừ 50% điểm", "Nhắc nhở / Cảnh cáo", "Hủy bài thi"], c: 2, exp: "Lần đầu vi phạm nhắc nhở, tiếp tục vi phạm sẽ bị lập biên bản cảnh cáo trừ % điểm theo quy chế." },
-            { q: "File minh chứng bài thi/hồ sơ scan lên NAS nên để định dạng nào?", o: ["Word", "JPEG", "PDF", "Excel"], c: 2, exp: "Định dạng PDF chuẩn giúp bảo toàn định dạng văn bản và minh chứng rõ ràng." },
-            { q: "Chấm thi vấn đáp có bắt buộc ghi lại nội dung trả lời vào phiếu chấm?", o: ["Không cần", "Chỉ ghi điểm", "Có, ghi tóm tắt ý trả lời", "Chỉ ghi điểm chữ"], c: 2, exp: "Giảng viên chấm vấn đáp phải ghi rõ nhận xét tóm tắt nội dung trả lời của SV vào phiếu chấm." },
-            { q: "Nộp túi bài thi tự luận về G209 sau khi kết thúc ca thi trong thời gian?", o: ["Trong ngày", "Sau 24 giờ", "Ngay sau khi kết thúc ca thi", "Trước ca thi tiếp"], c: 2, exp: "CBCT bàn giao bài thi, đề thi thừa và hồ sơ phòng thi về G209 ngay sau khi hết giờ thi ca đó." },
-            { q: "Phần mềm quản lý đào tạo và điểm chính thức hiện nay của DNTU?", o: ["Excel", "Google Sheets", "PSC / Portal DNTU", "Moodle"], c: 2, exp: "Hệ thống PSC / Portal tích hợp là kênh chính thức nhập và quản lý điểm số toàn trường." },
-            { q: "Sinh viên bị bệnh trước ca thi cần xin giấy tờ xác nhận ở đâu?", o: ["Trạm xá xã", "Cơ sở y tế / Bệnh viện", "Giảng viên chủ nhiệm", "Gia đình"], c: 1, exp: "Minh chứng tạm hoãn thi phải do cơ sở y tế (Bệnh viện quận/huyện trở lên hoặc trạm y tế hợp lệ) chứng nhận." },
-            { q: "Kỳ thi phụ (thi vét / thi hoãn) thường diễn ra khi nào?", o: ["Hàng tuần", "Cuối mỗi học kỳ", "Giữa học kỳ", "Đầu mỗi năm học"], c: 1, exp: "Nhà trường tổ chức kỳ thi phụ sau mỗi học kỳ chính cho các sinh viên hoãn thi hợp lệ." },
-            { q: "Số lượng câu hỏi Dễ chiếm tỷ lệ bao nhiêu trong ngân hàng đề trắc nghiệm?", o: ["20%", "30%", "40%", "50%"], c: 1, exp: "Theo chuẩn 30% Dễ - 50% Trung bình - 20% Khó." },
-            { q: "Tỷ lệ câu hỏi phân loại Khó trong ngân hàng đề trắc nghiệm?", o: ["10%", "20%", "30%", "40%"], c: 1, exp: "Mức độ Khó chiếm đúng 20% tổng số câu hỏi trong ngân hàng." },
-            { q: "Thí sinh tô 2 đáp án cho cùng 1 câu trắc nghiệm trên phiếu OMR sẽ?", o: ["Tính đáp án A", "Tính đáp án đúng", "Không được tính điểm câu đó", "Trừ điểm câu đúng"], c: 2, exp: "Tô 2 đáp án bị coi là không hợp lệ và máy quét tự động bỏ qua không tính điểm câu đó." },
-            { q: "01 tín chỉ lý thuyết quy đổi bao nhiêu tiết dạy trên lớp?", o: ["10 tiết", "15 tiết", "30 tiết", "45 tiết"], c: 1, exp: "01 tín chỉ lý thuyết tương ứng 15 tiết học trên lớp tại DNTU." },
-            { q: "Mức điểm tổng kết đạt loại 'Giỏi' (thang 10) từ bao nhiêu điểm?", o: ["8.0", "8.5", "9.0", "7.5"], c: 1, exp: "Loại Giỏi tính từ 8.5 đến 8.9 (thang 10) hoặc 3.2 đến 3.59 (thang 4)." },
-            { q: "Số loại minh chứng chính trong hồ sơ thi không tập trung (Tiểu luận)?", o: ["2 loại", "3 loại", "4 loại", "5 loại"], c: 2, exp: "Gồm 4 loại: Đề thi, Đáp án/Rubric, Bảng điểm, Bài làm của sinh viên kèm phiếu chấm." },
-            { q: "Đề thi trắc nghiệm khi nộp về phòng Khảo thí bắt buộc kèm theo?", o: ["Danh sách SV", "Đáp án và Ma trận đề", "Bài giảng", "Sách tham khảo"], c: 1, exp: "Nộp đề trắc nghiệm bắt buộc đi kèm file Đáp án chuẩn và Ma trận phân bổ cấu trúc đề." },
-            { q: "SV bị đình chỉ thi môn A có được dự thi môn B tiếp theo không?", o: ["Tuyệt đối không", "Có, vẫn được thi môn B", "Tùy ý CBCT", "Hủy toàn bộ kỳ thi"], c: 1, exp: "Đình chỉ thi áp dụng cho từng học phần vi phạm, SV vẫn được thi các học phần khác bình thường." },
-            { q: "Nơi nhận túi bài thi tự luận để giảng viên mang đến phòng chấm?", o: ["Văn phòng Khoa", "Phòng Đào tạo", "Phòng G209 (Khảo thí)", "Phòng Hành chính"], c: 2, exp: "Giảng viên ký nhận bài thi trực tiếp tại Phòng G209 và chấm tại vị trí quy định." },
-            { q: "Tên thư mục/file tải lên hệ thống NAS tuân thủ theo?", o: ["Tên tự do", "Hướng dẫn cấu trúc của Trường / CNTT", "Mã số thuế", "Ngày tháng năm"], c: 1, exp: "Phải đặt theo đúng quy chuẩn cấu trúc mã lớp, mã học phần do nhà trường hướng dẫn." },
-            { q: "Hậu kiểm hồ sơ NAS của Phòng Khảo thí dựa trên tiêu chí?", o: ["Kích thước file", "Tính đầy đủ, chính xác, khớp với Portal", "Số lượng folder", "Tốc độ mạng"], c: 1, exp: "Đánh giá tính đầy đủ của minh chứng và sự khớp đúng giữa bảng điểm ký và điểm trên Portal." },
-            { q: "Đơn vị phê duyệt công bố điểm chính thức cho SV trên Portal?", o: ["Giảng viên", "Trưởng khoa", "Phòng Khảo thí & ĐBCL", "Hiệu trưởng"], c: 2, exp: "Phòng Khảo thí kiểm tra hồ sơ và duyệt khóa điểm công bố chính thức." },
-            { q: "Bút chì loại nào phù hợp nhất để tô phiếu trắc nghiệm?", o: ["Bút chì HB", "Bút chì 2B", "Bút chì 6B", "Bút chì màu"], c: 1, exp: "Chì 2B có độ đậm vừa phải, không làm lem bẩn giấy và giúp máy nhận dạng tối ưu." },
-            { q: "Mức độ 'Sáng tạo' trong thang Bloom có dùng trong thi trắc nghiệm không?", o: ["Dùng rất nhiều", "Rất hạn chế / Không phù hợp", "Bắt buộc 50%", "Môn nào cũng có"], c: 1, exp: "Cấp độ Sáng tạo đòi hỏi tự do thiết kế/tạo mới nên trắc nghiệm đóng khó đánh giá được." },
-            { q: "Giảng viên ra đề thi có phải ký cam kết bảo mật đề thi không?", o: ["Không cần", "Tùy môn", "Bắt buộc", "Chỉ giảng viên thỉnh giảng"], c: 2, exp: "Mọi giảng viên tham gia ra đề đều phải bảo mật tuyệt đối nội dung đề thi theo quy định." },
-            { q: "Địa điểm G209 chức năng chính là gì?", o: ["Phòng tiếp SV", "Bàn giao đề/bài thi & Nghiệp vụ Khảo thí", "Phòng máy vi tính", "Hội trường"], c: 1, exp: "G209 là trung tâm điều hành bàn giao bài thi và xử lý nghiệp vụ khảo thí." },
-            { q: "Trường hợp đề thi có câu hỏi bị sai sót nội dung, điểm câu đó xử lý?", o: ["Thưởng điểm tối đa câu đó cho tất cả SV", "Hủy bỏ ca thi", "Trừ điểm bài làm", "Không làm gì"], c: 0, exp: "Theo thông lệ khảo thí, nếu câu hỏi lỗi do phía ra đề, tất cả SV trong ca thi được cộng điểm tối đa câu đó." },
-            { q: "Thời gian tối đa được ra khỏi phòng thi đối với thi tự luận?", o: ["1/3 thời gian", "Sau 2/3 thời gian làm bài", "Sau 10 phút", "Không được ra"], c: 1, exp: "SV chỉ được ra khỏi phòng thi sau khi đã qua 2/3 thời gian làm bài thi tự luận." },
-            { q: "Đối với thi trắc nghiệm, sinh viên có được rời phòng thi sớm không?", o: ["Được ra bất kỳ lúc nào", "Không được rời phòng thi trong suốt giờ làm bài", "Sau 15 phút", "Sau nửa thời gian"], c: 1, exp: "Môn trắc nghiệm yêu cầu SV không ra khỏi phòng thi cho đến khi hết giờ và thu đủ bài." },
-            { q: "CBCT thu bài thi tự luận phải kiểm tra kỹ chi tiết nào?", o: ["Số tờ giấy thi và chữ ký của SV", "Màu mực", "Quê quán SV", "Điểm quá trình"], c: 0, exp: "CBCT bắt buộc đếm đúng số tờ bài làm và kiểm tra SV đã ký tên vào danh sách nộp bài." },
-            { q: "Trách nhiệm ra ma trận đề thi thuộc về ai?", o: ["Phòng Khảo thí", "Giảng viên/Tổ bộ môn phụ trách học phần", "Sinh viên", "Phòng Đào tạo"], c: 1, exp: "Giảng viên giảng dạy và tổ bộ môn xây dựng ma trận đề đáp ứng chuẩn đầu ra (CDR) học phần." },
-            { q: "Mỗi học phần thi tập trung cần chuẩn bị tối thiểu bao nhiêu đề thi?", o: ["01 đề", "Tối thiểu 02 đề chẵn/lẻ (hoặc nhiều mã đề)", "05 đề", "10 đề"], c: 1, exp: "Thi tự luận tối thiểu có 2 đề (Đề A - Đề B), thi trắc nghiệm đảo thành nhiều mã đề." },
-            { q: "Thang điểm chữ có mấy mức xếp loại cơ bản?", o: ["4 mức (A,B,C,D)", "5 mức (A,B,C,D,F)", "6 mức", "10 mức"], c: 1, exp: "Thang điểm chữ gồm 5 mức chính: A (Xuất sắc/Giỏi), B (Khá), C (Trung bình), D (Trung bình yếu), F (Kém/Rớt)." },
-            { q: "Sinh viên có điểm học phần bao nhiêu thì bị xếp loại điểm F?", o: ["Dưới 4.0", "Dưới 5.0", "Dưới 3.5", "Dưới 4.5"], c: 0, exp: "Thang điểm 10 dưới 4.0 tương ứng loại F (Không đạt học phần)." },
-            { q: "Đồ án tốt nghiệp / Khóa luận tốt nghiệp do ai chấm?", o: ["1 giảng viên", "Hội đồng đánh giá do Trường thành lập", "Phòng Khảo thí", "Lớp trưởng"], c: 1, exp: "Đánh giá đồ án/khóa luận do Hội đồng chuyên môn thực hiện theo quy định." },
-            { q: "Thời hạn lưu trữ đề thi, đáp án tại Phòng Khảo thí?", o: ["01 năm", "Lưu vĩnh viễn / Theo quy định lưu trữ", "06 tháng", "02 năm"], c: 1, exp: "Ngân hàng đề và đáp án được bảo mật và lưu trữ lâu dài trong hệ thống dữ liệu nhà trường." },
-            { q: "Khi chấm bài tự luận, CBCT 1 và CBCT 2 phải?", o: ["Chấm độc lập", "Chấm chung 1 lượt", "Một người chấm một người duyệt", "Để SV tự chấm"], c: 0, exp: "Quy trình chuẩn yêu cầu 2 cán bộ chấm thi độc lập trên phiếu chấm hoặc ghi điểm riêng trước khi thống nhất." },
-            { q: "Giảng viên chấm bài phát hiện có dấu hiệu đánh dấu bài thi thì xử lý?", o: ["Tự trừ điểm", "Giao bài cho Trưởng bộ môn/Phòng Khảo thí xử lý", "Xé bài", "Cho 0 điểm ngay"], c: 1, exp: "Báo cáo vị phạm về Phòng Khảo thí để lập hội đồng xử lý đúng thẩm quyền." },
-            { q: "Chữ ký của sinh viên trên danh sách dự thi dùng để làm gì?", o: ["Trang trí", "Xác nhận sự có mặt và nộp đủ bài thi", "Điểm danh hộ", "Tính điểm cộng"], c: 1, exp: "Là minh chứng pháp lý xác nhận SV có mặt và đã bàn giao bài làm cho CBCT." },
-            { q: "Trường hợp sinh viên làm bài thi trắc nghiệm bằng bút mực trên phiếu OMR?", o: ["Máy quét không chấm được / Lỗi bài", "Vẫn chấm bình thường", "Được cộng điểm", "CBCT tô lại giúp"], c: 0, exp: "Viết bút mực làm hỏng phiếu trắc nghiệm OMR và máy quét quang học bỏ qua." },
-            { q: "Hình thức thi Thực hành trên máy tính cần lưu trữ minh chứng gì?", o: ["File bài làm SV + Bảng điểm + Đề thi", "Chỉ cần bảng điểm", "Hình chụp máy tính", "Không cần lưu"], c: 0, exp: "Cần lưu file dữ liệu bài làm của SV tập trung vào thư mục/máy chủ quy định." },
-            { q: "Giảng viên nhập điểm trễ so với quy định sẽ bị xử lý thế nào?", o: ["Nhắc nhở / Tính vào đánh giá thi đua KPI", "Không phạt", "Trừ lương ngay", "Cấm giảng dạy"], c: 0, exp: "Việc chậm trễ nhập điểm ảnh hưởng tiến độ đào tạo và bị trừ điểm thi đua cán bộ/giảng viên." },
-            { q: "Quy trình phúc khảo bài thi trắc nghiệm được thực hiện bằng cách?", o: ["Rút bài thi chấm tay lại đối chiếu phiếu", "Giảng viên tự sửa", "Cho SV làm lại bài", "Tăng 1 điểm"], c: 0, exp: "Rút phiếu trả lời trắc nghiệm gốc, kiểm tra mã đề, chấm tay đối chiếu với đáp án chuẩn." },
-            { q: "Tỷ lệ tham dự lớp tối thiểu để sinh viên được dự thi cuối kỳ?", o: ["50%", "80% (hoặc theo quy định HP)", "100%", "60%"], c: 1, exp: "SV phải đảm bảo chuyên cần (thường từ 80% thời lượng) mới đủ điều kiện dự thi kết thúc học phần." },
-            { q: "Khi sinh viên xin hoãn thi hợp lệ, điểm học phần hiện trên hệ thống tạm thời là?", o: ["I (Incomplete - Hoãn thi)", "F", "0", "Pass"], c: 0, exp: "Ký hiệu 'I' dành cho các trường hợp được chấp thuận hoãn thi hợp lệ." },
-            { q: "Hình thức thi Vấn đáp cần có tối thiểu bao nhiêu giảng viên chấm?", o: ["1 giảng viên", "2 giảng viên", "3 giảng viên", "4 giảng viên"], c: 1, exp: "Thi vấn đáp bắt buộc bố trí 02 giảng viên cùng chấm độc lập và thống nhất điểm." },
-            { q: "Bảng điểm chấm thi tự luận sau khi hoàn hoàn thành phải có chữ ký của?", o: ["Cả 2 giảng viên chấm thi", "1 giảng viên", "SV đại diện", "Lớp trưởng"], c: 0, exp: "Cả 2 giảng viên tham gia chấm thi phải ký tên ghi rõ họ tên trên bảng điểm." },
-            { q: "Mã số đề thi trắc nghiệm do ai tạo ra?", o: ["Phòng Khảo thí / Phần mềm xáo đề", "SV tự chọn", "CBCT tự ghi", "Trưởng khoa"], c: 0, exp: "Phần mềm trộn đề thi tự động của Phòng Khảo thí tạo mã đề ngẫu nhiên." },
-            { q: "Sinh viên đến thi muộn dưới 15 phút thì xử lý thế nào?", o: ["Cho vào thi nhưng không bù thời gian làm bài", "Đuổi về", "Cộng thêm 15 phút", "Lập biên bản vi phạm"], c: 0, exp: "SV được vào làm bài ngay nhưng phải nộp bài cùng giờ với cả phòng thi." },
-            { q: "Danh sách sinh viên cấm thi do đơn vị nào duyệt công bố?", o: ["Giảng viên môn học đề xuất, Khoa/Phòng Đào tạo duyệt", "SV tự đăng ký", "CBCT", "Bảo vệ"], c: 0, exp: "Giảng viên chốt danh sách vắng quá quy định và báo Khoa/Đào tạo ra thông báo cấm thi." },
-            { q: "Ai là người có thẩm quyền ký giấy hoãn thi cho sinh viên?", o: ["Ban Giám hiệu / Phòng Khảo thí & ĐBCL", "Lớp trưởng", "Bảo vệ", "Giảng viên dạy lớp"], c: 0, exp: "Phòng Khảo thí & ĐBCL tiếp nhận đơn trình Lãnh đạo phê duyệt hoãn thi." },
-            { q: "Bộ chứng từ thanh toán giờ chấm thi bắt buộc có minh chứng nào?", o: ["Bảng điểm ký tên + Quyết định / Lịch phân công", "Chỉ cần hóa đơn", "Ảnh chụp bài thi", "Giấy giới thiệu"], c: 0, exp: "Phải kèm bảng điểm gốc đã chấm có đầy đủ chữ ký và quyết định phân công liên quan." },
-            { q: "Sổ tay Giảng viên DNTU cung cấp thông tin gì?", o: ["Toàn bộ quy trình, quy định giảng dạy và khảo thí", "Chỉ có sơ đồ trường", "Thời khóa biểu SV", "Thực đơn nhà ăn"], c: 0, exp: "Cung cấp đầy đủ hướng dẫn nghiệp vụ chuyên môn cho toàn thể GV." },
-            { q: "Khi kết thúc ca thi, CBCT phải niêm phong túi bài thi trước mặt ai?", o: ["Đại diện sinh viên hoặc CBCT thứ 2", "Bảo vệ", "Một mình", "Không cần niêm phong"], c: 0, exp: "Niêm phong túi bài thi công khai có xác nhận chữ ký giữa 2 CBCT." },
-            { q: "Trách nhiệm bảo mật ngân hàng câu hỏi thuộc về?", o: ["Toàn thể Cán bộ, Giảng viên liên quan", "Chỉ cán bộ IT", "Chỉ sinh viên", "Không cần bảo mật"], c: 0, exp: "Là tài sản trí tuệ và bảo mật cao cấp của nhà trường, mọi cá nhân phải giữ bí mật." },
-            { q: "Bạn có sẵn sàng mời Admin ly cafe không?", o: ["Có", "Không", "Lưỡng lự", "Tất nhiên rồi"], c: 3, exp: "Cảm ơn bạn! Sự ủng hộ của bạn là động lực rất lớn." } // CÂU 80 MỚI
+            // --- NHÓM 1: PHẦN MỀM & QUY TRÌNH NHẬP ĐIỂM (15 câu) ---
+            { q: "Thời hạn quy định nhập điểm quá trình lên hệ thống sau khi kết thúc học phần là bao lâu?", o: ["03 ngày", "05 ngày", "07 ngày", "14 ngày"], c: 0, exp: "Theo QĐ 312, giảng viên phải nhập điểm quá trình trong vòng 03 ngày kể từ ngày kết thúc học phần." },
+            { q: "Đối với hình thức thi không tập trung (Tiểu luận, Đồ án...), thời hạn hoàn tất nhập điểm cuối kỳ là?", o: ["03 ngày", "05 ngày", "07 ngày", "14 ngày"], c: 3, exp: "GV hoàn tất nhập điểm cuối kỳ thi không tập trung tối đa 14 ngày kể từ ngày thi." },
+            { q: "Quy trình chấm và nhập điểm thi tự luận trên hệ thống PSC (từ túi bài thi) gồm mấy bước cơ bản?", o: ["4 bước", "5 bước", "6 bước", "7 bước"], c: 2, exp: "Gồm 6 bước: 1. Chọn menu Túi bài thi; 2. Nhận bài tại G209; 3. Chấm vào phiếu; 4. Xuất mẫu import; 5. Import điểm; 6. Gửi điểm." },
+            { q: "Khi nhập điểm thi tự luận (trên giấy), sau khi import file Excel thành công, bước cuối cùng trên phần mềm là gì?", o: ["Lưu điểm", "Khóa điểm", "Gửi điểm", "Xuất bảng điểm"], c: 2, exp: "Sau khi Import và Lưu điểm, GV phải nhấn nút 'Gửi điểm' để hệ thống ghi nhận hoàn tất." },
+            { q: "Quy trình nhập điểm cho môn thi VẤN ĐÁP gồm bao nhiêu bước?", o: ["3 bước", "4 bước", "5 bước", "6 bước"], c: 2, exp: "Gồm 5 bước: 1. Quản lý KQHT; 2. Quản lý tổ chức thi; 3. Nhập điểm theo lịch thi; 4. Chọn đợt/Cơ sở/Loại thi; 5. Chọn danh sách học phần." },
+            { q: "Trong kỳ thi Vấn đáp, yêu cầu bắt buộc đối với quá trình tổ chức thi là gì?", o: ["Phải có ít nhất 3 giảng viên", "Quá trình thi sẽ được ghi hình", "Sinh viên tự quay video", "Chỉ cần 1 giảng viên"], c: 1, exp: "Theo quy định, quá trình thi vấn đáp sẽ được Hội đồng ghi hình lại làm minh chứng." },
+            { q: "Thời hạn tải hồ sơ minh chứng Đánh giá quá trình lên NAS là bao lâu?", o: ["03 ngày sau khi kết thúc môn", "07 ngày sau khi kết thúc môn", "14 ngày", "Ngay lập tức"], c: 1, exp: "Đơn vị chuyên môn tải lên NAS trong vòng 07 ngày kể từ ngày kết thúc học phần." },
+            { q: "Thời hạn nộp hồ sơ minh chứng tổ chức thi cuối kỳ (thi không tập trung) lên NAS là?", o: ["03 ngày sau khi thi", "07 ngày sau khi công bố điểm", "14 ngày", "Tùy ý"], c: 1, exp: "Tải lên NAS trong vòng 07 ngày sau khi công bố điểm thi." },
+            { q: "Hồ sơ minh chứng tổ chức thi cuối kỳ trên NAS yêu cầu tối thiểu mấy loại tài liệu?", o: ["2 loại", "3 loại", "4 loại", "5 loại"], c: 2, exp: "Gồm 4 loại: Đề thi, Tiêu chí đánh giá/Đáp án, Bài làm của SV, Phiếu chấm." },
+            { q: "Công thức chuẩn tính Điểm Học Phần là?", o: ["30% Quá trình + 70% Cuối kỳ", "40% Quá trình + 60% Cuối kỳ", "50% Quá trình + 50% Cuối kỳ", "100% Cuối kỳ"], c: 2, exp: "Điểm học phần = 50% Điểm quá trình + 50% Điểm cuối kỳ." },
+            { q: "Công thức tính Điểm Quá Trình là?", o: ["30% Thường xuyên + 20% Giữa kỳ", "20% Thường xuyên + 30% Giữa kỳ", "50% Thường xuyên", "40% Thường xuyên + 10% Giữa kỳ"], c: 0, exp: "Điểm Quá trình = 30% Thường xuyên + 20% Giữa kỳ." },
+            { q: "Học phần 01 tín chỉ bắt buộc có bao nhiêu cột điểm kiểm tra Thường xuyên?", o: ["01 cột", "02 cột", "03 cột", "Không cần"], c: 1, exp: "Học phần 1 TC và các HP chính trị, pháp luật yêu cầu 02 cột điểm Thường xuyên." },
+            { q: "Học phần từ 02 tín chỉ trở lên bắt buộc có bao nhiêu cột điểm kiểm tra Thường xuyên?", o: ["01 cột", "02 cột", "03 cột", "04 cột"], c: 2, exp: "Học phần từ 2 TC trở lên yêu cầu 03 cột điểm kiểm tra Thường xuyên." },
+            { q: "Để xem danh sách sinh viên vắng thi và điểm danh, Giảng viên vào Menu nào trên Portal?", o: ["Nhập điểm cuối kỳ", "Điểm danh sinh viên", "Lịch theo tiến độ", "Quản lý thi lại"], c: 1, exp: "Vào mục Điểm danh sinh viên -> Chọn đợt, ngày, lớp để thao tác." },
+            { q: "Trong quy trình nhập điểm Thường kỳ (Quá trình), sau khi nhập xong, giảng viên cần thao tác nút nào để chốt điểm?", o: ["Gửi điểm", "Khóa điểm & Xét điều kiện dự thi", "Lưu nháp", "Chỉ cần Import"], c: 1, exp: "Bắt buộc nhấn 'Khóa điểm & Xét điều kiện dự thi' để hệ thống chốt danh sách." },
+            
+            // --- NHÓM 2: 11 HÌNH THỨC ĐÁNH GIÁ & RUBRIC (35 câu Sàng lui sàng tới) ---
+            { q: "Quy định khảo thí DNTU có tổng cộng bao nhiêu Hình thức đánh giá?", o: ["7 hình thức", "9 hình thức", "11 hình thức", "12 hình thức"], c: 2, exp: "Có tổng cộng 11 hình thức đánh giá (từ Bài tập thường xuyên đến Khóa luận)." },
+            { q: "Hình thức đánh giá 'Bài tập thường xuyên' có yêu cầu sử dụng Rubric không?", o: ["Bắt buộc có", "Không sử dụng Rubric", "Tùy Giảng viên", "Chỉ dùng khi có yêu cầu"], c: 1, exp: "Nhóm đánh giá thường xuyên (Bài tập thường xuyên) KHÔNG dùng Rubric." },
+            { q: "Hình thức đánh giá 'Trắc nghiệm' thuộc nhóm nào?", o: ["Có Rubric", "Không Rubric", "Rubric tự chọn", "Tùy môn"], c: 1, exp: "Trắc nghiệm là hình thức Đánh giá Giữa kỳ/Cuối kỳ KHÔNG RUBRIC." },
+            { q: "Hình thức đánh giá 'Tự luận' có bắt buộc sử dụng Rubric không?", o: ["Có, bắt buộc", "Không, nhưng phải có đáp án chi tiết tới 0.25 điểm", "Tùy Giảng viên", "Sử dụng Rubric tự do"], c: 1, exp: "Tự luận thuộc nhóm KHÔNG RUBRIC, nhưng bắt buộc có Đáp án chi tiết tới 0.25 điểm." },
+            { q: "Hình thức 'Tiểu luận' thuộc nhóm đánh giá nào?", o: ["Đánh giá có Rubric", "Đánh giá không Rubric", "Chỉ dùng cho Thường xuyên", "Chỉ dùng cho Cuối khóa"], c: 0, exp: "Tiểu luận là hình thức Giữa kỳ/Cuối kỳ CÓ RUBRIC." },
+            { q: "Sự khác biệt cốt lõi giữa hình thức 'Báo cáo' và 'Tiểu luận' là gì?", o: ["Báo cáo nộp file, Tiểu luận nộp giấy", "Báo cáo yêu cầu thuyết trình trước hội đồng, Tiểu luận không yêu cầu", "Tiểu luận có Rubric, Báo cáo không có", "Không có sự khác biệt"], c: 1, exp: "Báo cáo bắt buộc có phần thuyết trình/báo cáo trực tiếp trước hội đồng." },
+            { q: "Hình thức 'Tiểu luận' có yêu cầu sinh viên phải thuyết trình không?", o: ["Bắt buộc có", "Không yêu cầu thuyết trình", "Tùy Giảng viên thích thì làm", "Luôn đi kèm thực hành"], c: 1, exp: "Quy định ghi rõ: 4. Tiểu luận (Không yêu cầu thuyết trình)." },
+            { q: "Hình thức 'Báo cáo' có yêu cầu thuyết trình không?", o: ["Không", "Có, thuyết trình/báo cáo trước hội đồng", "Tùy SV tự quyết", "Chỉ nộp file Word"], c: 1, exp: "Báo cáo (Yêu cầu thuyết trình/báo cáo trước hội đồng)." },
+            { q: "Hình thức 'Thuyết trình' có yêu cầu gì đi kèm?", o: ["Phải có video", "Có slide/tài liệu hỗ trợ", "Phải viết báo cáo 50 trang", "Không cần chuẩn bị gì"], c: 1, exp: "Thuyết trình yêu cầu có Slide/tài liệu hỗ trợ đi kèm và chấm bằng Rubric." },
+            { q: "Hình thức 'Thực hành' được thực hiện ở đâu?", o: ["Tại nhà", "Tại phòng lý thuyết", "Tại phòng thí nghiệm/xưởng/thực tế", "Trực tuyến"], c: 2, exp: "Thực hành yêu cầu môi trường phòng thí nghiệm/xưởng hoặc thực tế và chấm bằng Rubric." },
+            { q: "Hình thức 'Video clip' nhấn mạnh vào yếu tố nào khi đánh giá?", o: ["Số lượng chữ", "Sáng tạo & Công nghệ", "Khả năng viết", "Tốc độ nói"], c: 1, exp: "Video clip nhấn mạnh vào tính Sáng tạo và ứng dụng Công nghệ." },
+            { q: "Hình thức 'Vấn đáp' được mô tả như thế nào?", o: ["Làm bài trên giấy rồi vấn đáp", "Hỏi đáp trực tiếp với hội đồng", "Quay video trả lời", "Chat trực tuyến"], c: 1, exp: "Vấn đáp là hỏi đáp trực tiếp với hội đồng (Có Rubric)." },
+            { q: "Hình thức 'Đồ án môn học' có yêu cầu bảo vệ không?", o: ["Không", "Bảo vệ trước hội đồng", "Chỉ nộp quyển", "Tự đánh giá"], c: 1, exp: "Đồ án môn học yêu cầu phải bảo vệ trước hội đồng (Có Rubric)." },
+            { q: "Nhóm đánh giá Cuối khóa (Có Rubric) bao gồm hình thức nào?", o: ["Tiểu luận", "Vấn đáp", "Báo cáo", "Khóa luận / Đồ án tốt nghiệp"], c: 3, exp: "Khóa luận/ĐATN là công trình nghiên cứu quy mô lớn thuộc Đánh giá cuối khóa." },
+            { q: "Nhận định: 'Giảng viên có thể sử dụng hình thức Tiểu luận để đánh giá Giữa kỳ' là đúng hay sai?", o: ["Sai, Tiểu luận chỉ dành cho cuối kỳ", "Đúng, Tiểu luận áp dụng cho cả Giữa kỳ và Cuối kỳ", "Sai, Tiểu luận chỉ dùng cho Thường xuyên", "Tùy Khoa quyết định"], c: 1, exp: "Ma trận chỉ rõ: Tiểu luận nằm trong cột 'Đánh giá Giữa kỳ, Cuối kỳ (Có Rubric)'." },
+            { q: "Giảng viên dùng hình thức 'Video Clip' cho điểm Giữa kỳ có phù hợp quy định không?", o: ["Rất ổn, phù hợp quy định", "Sai hoàn toàn", "Chỉ được dùng cho Thực hành", "Chỉ dùng cho môn Xã hội"], c: 0, exp: "Video Clip nằm trong nhóm áp dụng cho Đánh giá Giữa kỳ và Cuối kỳ." },
+            { q: "Các hình thức đánh giá nào sau đây áp dụng cho TẬP TRUNG?", o: ["Tiểu luận, Báo cáo", "Trắc nghiệm, Tự luận, Trắc nghiệm kết hợp Tự luận, Vấn đáp", "Thực hành, Video clip", "Đồ án môn học"], c: 1, exp: "4 hình thức Tập trung: Trắc nghiệm, Tự luận, TN kết hợp TL, Vấn đáp." },
+            { q: "Hình thức nào sau đây KHÔNG TẬP TRUNG?", o: ["Trắc nghiệm", "Vấn đáp", "Tiểu luận, Thuyết trình, Video Clip", "Tự luận"], c: 2, exp: "Thi Không tập trung gồm 7 hình thức như: Tiểu luận, Báo cáo, Video, Đồ án..." },
+            { q: "Hình thức 'Báo cáo' thuộc nhóm đánh giá nào?", o: ["Tập trung", "Không tập trung", "Không được xếp loại", "Thường xuyên"], c: 1, exp: "Báo cáo thuộc 7 hình thức thi Không tập trung." },
+            { q: "Nhận định nào sau đây là ĐÚNG về hình thức Trắc nghiệm?", o: ["Cần sử dụng Rubric", "Thuộc nhóm thi Không tập trung", "Thuộc nhóm thi Tập trung và Không dùng Rubric", "Chỉ đánh giá mức độ Sáng tạo"], c: 2, exp: "Trắc nghiệm là thi Tập trung và KHÔNG sử dụng Rubric." },
+            { q: "Hình thức 'Trắc nghiệm kết hợp Tự luận' thuộc nhóm tổ chức thi nào?", o: ["Tập trung", "Không tập trung", "Chỉ thi Online", "Bảo vệ hội đồng"], c: 0, exp: "TN kết hợp TL là 1 trong 4 hình thức thi Tập trung." },
+            { q: "Nhận định nào sau đây là SAI?", o: ["Đồ án môn học phải bảo vệ trước hội đồng", "Tự luận không dùng Rubric", "Tiểu luận bắt buộc phải thuyết trình", "Bài tập thường xuyên không dùng Rubric"], c: 2, exp: "Sai vì 'Tiểu luận' được quy định là KHÔNG yêu cầu thuyết trình." },
+            { q: "Theo thang Bloom, mức độ NHỚ (Remember) được đánh giá tốt nhất qua hình thức nào?", o: ["Khóa luận", "Đồ án", "Trắc nghiệm, Tự luận", "Video clip"], c: 2, exp: "Mức độ Nhớ và Hiểu phù hợp nhất với Trắc nghiệm và Tự luận." },
+            { q: "Theo thang Bloom, mức độ SÁNG TẠO (Create) CHỈ đánh giá qua hình thức nào?", o: ["Trắc nghiệm", "Tự luận", "Đồ án môn học, Khóa luận/ĐATN", "Vấn đáp"], c: 2, exp: "Mức cao nhất (Sáng tạo) chỉ dùng Đồ án môn học hoặc Khóa luận/ĐATN." },
+            { q: "Hình thức 'Thuyết trình', 'Thực hành' có thể đánh giá tới mức độ nào của thang Bloom?", o: ["Nhớ", "Vận dụng, Phân tích, Đánh giá", "Chỉ Sáng tạo", "Không áp dụng Bloom"], c: 1, exp: "Các hình thức này thường đánh giá kỹ năng Vận dụng, Phân tích và Đánh giá." },
+            { q: "Hình thức 'Trắc nghiệm' ĐƯỢC CHỈ ĐỊNH đánh giá tối đa đến cấp độ Bloom nào?", o: ["Sáng tạo", "Đánh giá", "Nhớ, Hiểu, Vận dụng", "Phân tích"], c: 2, exp: "Theo ma trận, Trắc nghiệm chỉ dùng để đánh giá Nhớ, Hiểu và Vận dụng." },
+            { q: "Nếu muốn đánh giá kỹ năng 'Phân tích' (Analyze) của SV, GV NÊN dùng hình thức nào?", o: ["Trắc nghiệm đơn thuần", "Bài tập thường xuyên", "Tự luận, Tiểu luận, Thuyết trình, Vấn đáp...", "Chỉ dùng Khóa luận"], c: 2, exp: "Từ mức Phân tích trở lên, các hình thức tự luận, tiểu luận, thuyết trình được ưu tiên." },
+            { q: "Nhận định: 'Hình thức Tự luận có thể đánh giá từ mức độ Nhớ đến mức độ Đánh giá (Evaluate)' là?", o: ["Đúng", "Sai", "Chỉ đánh giá Nhớ", "Chỉ đánh giá Sáng tạo"], c: 0, exp: "Tự luận phủ rộng từ Nhớ, Hiểu, Vận dụng, Phân tích đến Đánh giá." },
+            { q: "Hình thức 'Trắc nghiệm' có xuất hiện ở dòng 'Sáng tạo' của ma trận Bloom không?", o: ["Có", "Không", "Có nhưng hạn chế", "Tùy người ra đề"], c: 1, exp: "Không. Sáng tạo chỉ dùng cho Đồ án và Khóa luận." },
+            { q: "Nếu Giảng viên chọn hình thức thi là 'Thực hành', GV CÓ BẮT BUỘC biên soạn Rubric không?", o: ["Không", "Có, Thực hành thuộc nhóm CÓ RUBRIC", "Chỉ cần đáp án trắc nghiệm", "Tùy Trưởng khoa duyệt"], c: 1, exp: "Thực hành nằm trong danh mục Đánh giá Giữa kỳ/Cuối kỳ CÓ RUBRIC." },
+            { q: "Để sinh viên làm Video Clip thi cuối kỳ, GV phải cung cấp gì cho sinh viên?", o: ["Phiếu trắc nghiệm", "Rubric đánh giá tiêu chí", "Giấy nháp", "Không cung cấp gì"], c: 1, exp: "Video Clip thuộc nhóm Có Rubric, GV phải công bố Rubric cho SV biết tiêu chí." },
+            { q: "Thi Tự luận cần có 'Đáp án chi tiết tới 0.25 điểm' - điều này ĐÚNG hay SAI?", o: ["Sai, 0.5 điểm là đủ", "Đúng, bắt buộc theo quy định", "Sai, Tự luận phải dùng Rubric", "Tùy môn học"], c: 1, exp: "Quy định nêu rõ 'Tự luận: Bắt buộc có đáp án chi tiết tới 0.25 điểm'." },
+            { q: "Thi Vấn đáp tập trung vào hỏi đáp trực tiếp. Hình thức này có dùng Rubric không?", o: ["Không dùng", "Có dùng Rubric", "Chỉ lấy điểm cảm tính", "Dùng đáp án trắc nghiệm"], c: 1, exp: "Vấn đáp thuộc nhóm Đánh giá CÓ RUBRIC." },
+            { q: "Hình thức nào có sự xuất hiện xuyên suốt từ mức Nhớ đến mức Đánh giá trong thang Bloom?", o: ["Trắc nghiệm", "Đồ án", "Tự luận", "Video"], c: 2, exp: "Tự luận xuất hiện ở các mức: Nhớ, Hiểu, Vận dụng, Phân tích, Đánh giá." },
+            { q: "Việc lựa chọn hình thức đánh giá (Ví dụ: chọn Tự luận hay Tiểu luận) cần căn cứ vào đâu?", o: ["Sở thích của sinh viên", "Độ khó của phần mềm", "Chuẩn đầu ra (CĐR) của học phần", "Thời tiết"], c: 2, exp: "Mọi hình thức đánh giá phải được thiết kế để đo lường chính xác Chuẩn đầu ra (CĐR)." },
+
+            // --- NHÓM 3: NGÂN HÀNG ĐỀ THI & LỊCH THI (15 câu) ---
+            { q: "Đối với hình thức Trắc nghiệm, số lượng câu hỏi tối thiểu trong ngân hàng đề thi là bao nhiêu?", o: ["50 câu/1 tín chỉ", "80 câu/1 tín chỉ", "100 câu hỏi/01 tín chỉ", "200 câu/môn"], c: 2, exp: "Quy định số lượng tối thiểu cho Trắc nghiệm là 100 câu/01 tín chỉ." },
+            { q: "Đối với hình thức Tự luận, số lượng đề thi tối thiểu trong ngân hàng là bao nhiêu?", o: ["02 đề/01 tín chỉ", "05 đề thi/01 tín chỉ", "10 đề thi/01 tín chỉ", "Tùy chọn"], c: 1, exp: "Quy định tối thiểu 05 đề thi/01 tín chỉ (hoặc tối thiểu 15 câu hỏi/01 tín chỉ)." },
+            { q: "Đối với hình thức Vấn đáp, quy định số lượng đề thi tối thiểu là?", o: ["02 đề", "03 đề/tín chỉ", "05 đề/01 tín chỉ", "Không quy định"], c: 2, exp: "Vấn đáp yêu cầu số lượng tối thiểu 05 đề/01 tín chỉ." },
+            { q: "Tỷ lệ phân bổ độ khó (Dễ - TB - Khó) chuẩn cho câu hỏi trong ngân hàng đề là?", o: ["20% Dễ - 60% TB - 20% Khó", "30% Dễ - 50% TB - 20% Khó", "40% Dễ - 40% TB - 20% Khó", "50% Dễ - 30% TB - 20% Khó"], c: 1, exp: "Quy định phân bổ tỷ lệ: 30% Dễ - 50% TB - 20% Khó." },
+            { q: "Học phần 01-02 tín chỉ thi TỰ LUẬN có thời lượng làm bài áp dụng là bao nhiêu?", o: ["45 - 60 phút", "Từ 60 phút đến 75 phút", "90 phút", "120 phút"], c: 1, exp: "Học phần 1-2 TC thi Tự luận có thời gian từ 60 phút đến 75 phút." },
+            { q: "Học phần từ 03 tín chỉ trở lên thi TỰ LUẬN có thời lượng tối thiểu là?", o: ["60 phút", "75 phút", "Tối thiểu 90 phút", "120 phút"], c: 2, exp: "Đối với môn từ 3 TC trở lên thi Tự luận, thời gian làm bài tối thiểu 90 phút." },
+            { q: "Thời lượng TỐI ĐA áp dụng cho kỳ thi TRẮC NGHIỆM đối với môn 01-02 tín chỉ là?", o: ["45 phút", "Tối đa 60 phút", "75 phút", "90 phút"], c: 1, exp: "Thi Trắc nghiệm môn 1-2 TC có thời gian tối đa 60 phút." },
+            { q: "Thời lượng TỐI ĐA áp dụng cho kỳ thi TRẮC NGHIỆM đối với môn từ 03 tín chỉ trở lên là?", o: ["60 phút", "Tối đa 75 phút", "90 phút", "120 phút"], c: 1, exp: "Thi Trắc nghiệm môn >= 3TC có thời gian tối đa 75 phút." },
+            { q: "Lịch thi đối với 'Học phần thi TẬP TRUNG' được công bố khi nào?", o: ["Trước khi thi 01 ngày", "Tối thiểu 07 ngày trước khi diễn ra kỳ thi", "Trước 1 tháng", "Không thông báo"], c: 1, exp: "Lịch thi tập trung được công bố tối thiểu 07 ngày trước khi diễn ra kỳ thi." },
+            { q: "Lịch thi đối với 'Học phần thi KHÔNG TẬP TRUNG' được công bố khi nào?", o: ["Cuối học kỳ", "Trước 07 ngày", "Trong vòng 03 tuần kể từ ngày bắt đầu học kỳ", "Giữa kỳ"], c: 2, exp: "Thi Không tập trung có lịch công bố sớm trong vòng 03 tuần đầu học kỳ." },
+            { q: "Sinh viên muốn XIN HOÃN THI phải nộp đơn kèm minh chứng trong thời gian nào?", o: ["Sau 1 tuần", "Chậm nhất 03 ngày làm việc kể từ ngày vắng thi", "Trước 1 tháng", "Trong ngày thi"], c: 1, exp: "Hạn chót nộp đơn hoãn thi là 03 ngày làm việc kể từ khi công bố lịch hoặc ngày vắng thi." },
+            { q: "Khi sinh viên được duyệt hoãn thi hợp lệ, điểm học phần tạm thời ghi nhận là?", o: ["Điểm F", "Điểm 0", "Điểm I (Incomplete)", "Bỏ trống"], c: 2, exp: "Hệ thống ghi nhận điểm 'I' cho các trường hợp hoãn thi." },
+            { q: "Đơn vị nào phê duyệt sự đồng ý khi Giảng viên muốn đổi người coi thi do đột xuất?", o: ["Trưởng khoa", "Phòng Đào tạo", "Phòng Khảo thí & ĐBCL", "Bảo vệ"], c: 2, exp: "GV phải báo Khoa/Bộ môn và ĐƯỢC Phòng KT&ĐBCL đồng ý mới được đổi." },
+            { q: "Nhận định: 'Lịch thi không tập trung chỉ được báo trước 7 ngày' là Đúng hay Sai?", o: ["Đúng", "Sai", "Tùy môn", "Tùy Giảng viên"], c: 1, exp: "Sai. Lịch thi không tập trung công bố trong vòng 03 tuần từ khi BẮT ĐẦU học kỳ." },
+            { q: "Ngân hàng đề thi phải đáp ứng tiêu chí cốt lõi nào?", o: ["Chỉ hỏi câu khó", "Dài hơn 10 trang", "Bao quát tất cả nội dung và đánh giá được Chuẩn đầu ra", "Chỉ hỏi lý thuyết"], c: 2, exp: "Mục đích của ngân hàng đề là bao quát kiến thức và đo lường Chuẩn đầu ra (CĐR)." },
+
+            // --- NHÓM 4: CÔNG TÁC COI THI & XỬ LÝ VI PHẠM (20 câu) ---
+            { q: "Giai đoạn trước giờ thi, Cán bộ coi thi phải có mặt tại phòng Hội đồng trước bao nhiêu phút?", o: ["15 phút", "20 phút", "30 phút", "45 phút"], c: 2, exp: "Quy định mới nhấn mạnh CBCT phải có mặt trước 30 phút để nhận hồ sơ thi." },
+            { q: "Trước khi thi, CBCT phải ghi thông tin gì lên bảng?", o: ["Chỉ Môn thi", "Môn thi, Thời gian, Sơ đồ ngồi", "Lời chúc thi tốt", "Không cần ghi"], c: 1, exp: "Bắt buộc ghi Môn thi, Thời gian thi và vẽ Sơ đồ chỗ ngồi lên bảng." },
+            { q: "Khi phát hiện sinh viên mặc đồng phục KHÔNG ĐÚNG quy định, CBCT xử lý thế nào?", o: ["Cho vào thi bình thường", "Trừ điểm", "Bắt sinh viên về thay đồng phục đúng quy định", "Lập biên bản"], c: 2, exp: "Sinh viên sai đồng phục sẽ bị yêu cầu ra về thay đồng phục mới được vào thi." },
+            { q: "Sinh viên KHÔNG CÓ thẻ sinh viên khi vào phòng thi phải xử lý thế nào?", o: ["Đuổi về không cho thi", "Đưa về phòng Hội đồng làm Giấy cam đoan và bổ sung giấy tờ trong 24h", "Cho mượn thẻ", "Lập biên bản vi phạm"], c: 1, exp: "Sinh viên quên thẻ phải xuống phòng Hội đồng làm cam đoan kèm giấy tờ tùy thân có ảnh." },
+            { q: "Trong giờ thi, Cán bộ coi thi KHÔNG ĐƯỢC làm gì?", o: ["Quan sát sinh viên", "Ký giấy nháp", "Đọc báo, viết vẽ, dùng điện thoại", "Nhắc nhở thời gian"], c: 2, exp: "CBCT phải tập trung tuyệt đối, nghiêm cấm sử dụng điện thoại, đọc báo làm việc riêng." },
+            { q: "Nếu CBCT cần ra ngoài trong giờ thi (đi vệ sinh, sự cố...), phải làm gì?", o: ["Tự ý ra ngoài", "Nhờ sinh viên trông lớp", "Phải gọi Giám sát hành lang hỗ trợ", "Khóa cửa phòng"], c: 2, exp: "CBCT không tự ý rời phòng, phải gọi Giám sát đến thế chỗ tạm thời." },
+            { q: "Đặc thù coi thi trên máy tính (Hệ thống iTest): Giám thị 1 có được dùng Laptop không?", o: ["Không", "Có, Được phép sử dụng laptop cá nhân để giám sát hệ thống iTest", "Dùng để lướt web", "Ai cũng được dùng"], c: 1, exp: "Chỉ GT1 được dùng laptop kết nối iTest để điều khiển và giám sát ca thi." },
+            { q: "Đặc thù coi thi trên máy tính (Hệ thống iTest): Giám thị 2 có được dùng máy tính không?", o: ["Được dùng", "Chỉ dùng điện thoại", "KHÔNG sử dụng máy tính, phải quan sát trực tiếp toàn bộ phòng thi", "Dùng chung với GT1"], c: 2, exp: "GT2 cấm dùng máy tính, nhiệm vụ chính là đi lại quan sát trực tiếp thí sinh." },
+            { q: "Vật dụng nào sau đây KHÔNG ĐƯỢC mang vào phòng thi?", o: ["Bút chì", "Máy tính cá nhân (Calculator)", "Thước kẻ", "Điện thoại (dù tắt nguồn)"], c: 3, exp: "Tuyệt đối cấm mang điện thoại, tài liệu, túi xách, áo khoác vào chỗ ngồi." },
+            { q: "Đối với thi Tự luận, sinh viên được phép nộp bài và ra về sớm nhất sau bao lâu?", o: ["1/3 thời gian", "1/2 thời gian", "Sau 2/3 thời gian thi", "Hết giờ mới được về"], c: 2, exp: "Sinh viên chỉ được nộp bài ra về khi đã qua 2/3 thời gian làm bài." },
+            { q: "Lỗi 'Nhìn bài của thí sinh khác' (Lần 1) chịu mức phạt nào?", o: ["Khiển trách (Trừ 25% số điểm thi)", "Cảnh cáo (Trừ 50%)", "Đình chỉ", "Nhắc nhở không trừ điểm"], c: 0, exp: "Nhìn bài, nói chuyện, ngồi sai vị trí (lần đầu) bị Khiển trách trừ 25% điểm." },
+            { q: "Lỗi 'Trao đổi bài thi hoặc giấy nháp với nhau' chịu mức phạt nào?", o: ["Khiển trách (Trừ 25%)", "Cảnh cáo (Trừ 50% số điểm thi)", "Đình chỉ", "Trừ 100%"], c: 1, exp: "Hành vi trao đổi bài/nháp, hoặc tái phạm lỗi Khiển trách sẽ bị Cảnh cáo trừ 50% điểm." },
+            { q: "Lỗi 'Chép bài của thí sinh khác hoặc cho người khác chép bài' phạt mức nào?", o: ["Khiển trách", "Cảnh cáo (Trừ 50% điểm)", "Đình chỉ", "Chỉ hủy bài người chép"], c: 1, exp: "Hành vi chép bài phạt mức Cảnh cáo trừ 50% số điểm thi của môn đó." },
+            { q: "Hành vi 'Mang điện thoại vào phòng thi' bị xử lý thế nào?", o: ["Thu giữ đến hết giờ", "Trừ 50% điểm", "Đình chỉ thi, Hủy kết quả bài thi", "Chỉ nhắc nhở"], c: 2, exp: "Mang điện thoại/thiết bị thu phát (dù tắt nguồn) lập tức bị Đình chỉ thi (Điểm 0)." },
+            { q: "Sinh viên có hành vi 'Nhờ người khác làm bài thi hộ hoặc làm bài hộ' bị xử lý?", o: ["Cảnh cáo", "Trừ 50% điểm", "Đình chỉ thi, xử lý kỷ luật (có thể đuổi học)", "Chỉ cấm thi môn đó"], c: 2, exp: "Thi hộ là vi phạm cực kỳ nghiêm trọng, dẫn đến đình chỉ và kỷ luật toàn trường." },
+            { q: "Khi thi iTest, thí sinh thu nhỏ màn hình hoặc chuyển sang ứng dụng khác quá 15s bị phạt?", o: ["Cảnh cáo", "Khiển trách (Trừ 25% điểm)", "Đình chỉ", "Máy tự khóa vĩnh viễn"], c: 1, exp: "Thoát chế độ toàn màn hình iTest quá 15s (lần 1) bị Khiển trách trừ 25%." },
+            { q: "CBCT mở niêm phong đề thi trước mặt ai?", o: ["Chỉ GT2", "Ít nhất 2 thí sinh ký xác nhận", "Phòng Khảo thí", "Không cần ai"], c: 1, exp: "Bắt buộc mở niêm phong túi đề công khai, có 2 sinh viên kiểm tra và ký tên chứng kiến." },
+            { q: "Giấy nháp thi tự luận hợp lệ là giấy như thế nào?", o: ["Giấy SV tự mang từ nhà", "Phải do Hội đồng phát và có đủ chữ ký CBCT (không ký dư)", "Giấy photo trắng", "Báo cũ"], c: 1, exp: "Giấy nháp chuẩn, có chữ ký tươi của CBCT (ký số lượng vừa đủ phát)." },
+            { q: "Trách nhiệm lưu/nộp bài trên hệ thống iTest thuộc về ai?", o: ["Giám thị 1", "Hệ thống tự lưu", "Thí sinh hoàn toàn tự chịu trách nhiệm", "IT Trường"], c: 2, exp: "Thí sinh phải tuân thủ hướng dẫn, nếu thao tác sai dẫn đến lỗi nộp bài, thí sinh tự chịu trách nhiệm." },
+            { q: "Túi xách, áo khoác, tài liệu không được mang vào chỗ ngồi thì để ở đâu?", o: ["Mang vào WC", "Để ở BỤC GIẢNG và tự quản lý", "Gửi giám thị giữ hộ", "Để ngoài hành lang"], c: 1, exp: "Để tập trung tại bục giảng phòng thi và SV tự chịu trách nhiệm quản lý tài sản." },
+
+            // --- NHÓM 5: CHẤM THI, CÔNG BỐ ĐIỂM, PHÚC KHẢO & THI LẠI (15 câu) ---
+            { q: "Thời gian tối đa để Giảng viên hoàn thành chấm bài thi tự luận (kể cả nhập điểm) là?", o: ["03 ngày làm việc", "05 ngày làm việc", "07 ngày làm việc kể từ ngày nhận túi bài", "10 ngày"], c: 2, exp: "Quy định chấm bài tự luận là không quá 07 ngày làm việc. Quá hạn hệ thống tự khóa." },
+            { q: "Hình thức chấm bài Tự luận được thực hiện như thế nào?", o: ["1 GV chấm", "GV1 chấm trên phiếu, GV2 chấm trực tiếp trên bài thi", "Cả 2 GV chấm trên bài", "Chỉ chấm trên phiếu"], c: 1, exp: "GV1 chấm độc lập trên phiếu, GV2 chấm trực tiếp trên bài thi." },
+            { q: "Khi chênh lệch điểm giữa 2 GV chấm thi DƯỚI 1.0 điểm, cách xử lý là?", o: ["Lấy điểm GV1", "Hai GV tự thảo luận, thống nhất, lập biên bản, ghi điểm, Trưởng bộ môn duyệt", "Cộng chia đôi", "Mời GV3"], c: 1, exp: "Dưới 1.0 thì 2 GV tự hội ý thống nhất và trình Trưởng Bộ môn phê duyệt." },
+            { q: "Khi chênh lệch điểm giữa 2 GV chấm thi TỪ 1.0 điểm TRỞ LÊN, cách xử lý là?", o: ["Hai GV tự chia đôi", "Phối hợp với Trưởng Bộ môn thống nhất, lập biên bản, trình Lãnh đạo Đơn vị (Khoa) duyệt", "Hủy bài thi", "Phòng Khảo thí chấm"], c: 1, exp: "Chênh lệch >= 1.0 phải có Trưởng Bộ môn can thiệp và Lãnh đạo Khoa phê duyệt." },
+            { q: "Phòng KT&ĐBCL gửi dữ liệu điểm thi (trắc nghiệm/phần mềm) cho Khoa trong thời gian bao lâu?", o: ["01 ngày", "Trong vòng 02 ngày kể từ ngày hoàn tất", "05 ngày", "07 ngày"], c: 1, exp: "Phòng KT&ĐBCL gửi điểm về Khoa trong 02 ngày sau khi chấm xong." },
+            { q: "Giảng viên có bao nhiêu ngày để 'Phân tích phổ điểm' kể từ ngày nhận dữ liệu?", o: ["02 ngày", "03 ngày", "Không quá 05 ngày làm việc", "07 ngày"], c: 2, exp: "Quy định thời gian phân tích phổ điểm là tối đa 05 ngày làm việc." },
+            { q: "Thời hạn tối đa để CÔNG BỐ ĐIỂM chính thức cho sinh viên là bao lâu?", o: ["07 ngày sau thi", "10 ngày sau thi", "14 ngày làm việc kể từ ngày thi", "21 ngày"], c: 2, exp: "Điểm phải được công bố trên portal tối đa 14 ngày làm việc kể từ khi thi." },
+            { q: "Sinh viên nộp đơn PHÚC KHẢO bài thi tại đâu và trong thời hạn nào?", o: ["Tại Khoa, trong 03 ngày", "Tại Bộ phận Hỗ trợ người học, trong 07 ngày kể từ ngày công bố điểm", "Tại Khảo thí, trong 14 ngày", "Bất kỳ lúc nào"], c: 1, exp: "Nộp tại One-Stop (Hỗ trợ người học) trong vòng 07 ngày sau khi có điểm." },
+            { q: "Hình thức thi nào KHÔNG được áp dụng Phúc khảo?", o: ["Tự luận", "Trắc nghiệm", "Vấn đáp", "Thực hành trên máy"], c: 2, exp: "Phúc khảo chỉ áp dụng cho thi cuối kỳ tập trung, KHÔNG áp dụng cho hình thức VẤN ĐÁP." },
+            { q: "Khoa phân công GV chấm phúc khảo và nhập điểm trong thời hạn tối đa bao lâu?", o: ["03 ngày", "05 ngày làm việc", "07 ngày", "10 ngày"], c: 1, exp: "Thời hạn giải quyết phúc khảo tại Khoa là tối đa 05 ngày làm việc." },
+            { q: "Nếu kết quả phúc khảo có ĐIỀU CHỈNH ĐIỂM, đơn vị nào phê duyệt cuối cùng?", o: ["Trưởng Khoa", "Phòng Đào tạo", "Phòng KT&ĐBCL trình Hiệu trưởng phê duyệt", "Giảng viên tự sửa"], c: 2, exp: "Mọi thay đổi điểm sau phúc khảo phải lập biên bản trình Hiệu trưởng phê duyệt." },
+            { q: "Kỳ THI LẠI áp dụng cho các hình thức đánh giá nào?", o: ["Tất cả các hình thức", "Chỉ áp dụng cho THI CUỐI KỲ TẬP TRUNG", "Tiểu luận và Đồ án", "Vấn đáp"], c: 1, exp: "Thi lại chỉ mở cho các học phần có hình thức Thi Cuối kỳ Tập trung." },
+            { q: "Kỳ THI LẠI có được áp dụng cho hình thức thi Vấn đáp không?", o: ["Có", "Chỉ áp dụng môn chuyên ngành", "KHÔNG áp dụng cho hình thức VẤN ĐÁP", "Tùy Khoa"], c: 2, exp: "Quy định ghi rõ: Không áp dụng thi lại cho hình thức Vấn đáp." },
+            { q: "Điểm học phần sau khi THI LẠI được quy định mức TỐI ĐA là bao nhiêu?", o: ["Không giới hạn", "Tối đa mức B (7.9)", "Không vượt quá mức điểm C (Tương đương 6.9)", "Chỉ tính điểm D"], c: 2, exp: "Sinh viên thi lại dù 10 điểm thì tổng kết môn tối đa chỉ nhận được điểm C (6.9)." },
+            { q: "Đối với học phần đăng ký thi lại, 'Điểm thi cuối kỳ' được tính như thế nào?", o: ["Lấy trung bình 2 lần", "Tính theo kết quả của LẦN THI LẠI", "Lấy điểm cao hơn", "Cộng dồn"], c: 1, exp: "Hệ thống sẽ lấy điểm của bài thi lại để ráp vào công thức, nhưng khống chế max C." },
+            
+            // --- CÂU SỐ 101: CÂU ĐẶC BIỆT ---
+            { q: "Quý Thầy/Cô có sẵn sàng mời Admin ly cafe không?", o: ["Có", "Không", "Lưỡng lự", "Tất nhiên rồi"], c: 3, exp: "Cảm ơn Quý Thầy/Cô! Sự ủng hộ của Thầy/Cô là động lực rất lớn." } // CÂU 101
         ];
 
         let questions = [];
@@ -290,7 +317,7 @@
         window.startQuiz = async function() {
             const input = document.getElementById('user-name');
             if (input.value.trim() === "") {
-                alert("Vui lòng nhập Họ và Tên của bạn để ghi nhận kết quả!");
+                alert("Vui lòng nhập Họ và Tên của Quý Thầy/Cô để ghi nhận kết quả!");
                 return;
             }
             userName = input.value.trim();
@@ -306,14 +333,15 @@
             
             const count = parseInt(document.getElementById('mode-select').value);
             
-            // Tách câu hỏi 80 ra khỏi việc xáo trộn chung
-            const regularQuestions = rawBank.slice(0, rawBank.length - 1); // 79 câu đầu
-            const coffeeQuestion = rawBank[rawBank.length - 1]; // Câu 80
+            // Tách câu hỏi mời cafe ra khỏi việc xáo trộn chung
+            const regularQuestions = rawBank.slice(0, rawBank.length - 1); // 100 câu
+            const coffeeQuestion = rawBank[rawBank.length - 1]; // Câu 101
             
             const shuffled = [...regularQuestions].sort(() => 0.5 - Math.random());
             
-            // Lấy (count - 1) câu hỏi ngẫu nhiên và đảm bảo câu 80 luôn ở cuối
-            questions = shuffled.slice(0, Math.min(count - 1, regularQuestions.length));
+            // Lấy đủ số lượng câu hỏi chuyên môn user chọn (count)
+            questions = shuffled.slice(0, Math.min(count, regularQuestions.length));
+            // Luôn thêm câu mời cafe vào cuối cùng
             questions.push(coffeeQuestion); 
             
             document.getElementById('login-screen').classList.add('hidden');
@@ -410,7 +438,7 @@
             document.getElementById('result-screen').classList.remove('hidden');
             
             document.getElementById('final-score-display').innerText = `${score}/${questions.length}`;
-            document.getElementById('final-username').innerText = `Học viên: ${userName} | Thời gian: ${timeStr}`;
+            document.getElementById('final-username').innerText = `Thầy/Cô: ${userName} | Thời gian: ${timeStr}`;
             
             const icon = document.getElementById('result-icon');
             const title = document.getElementById('result-title');
@@ -422,17 +450,17 @@
                 icon.className = "inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-3 bg-emerald-100 text-emerald-600";
                 icon.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>';
                 title.innerText = "XUẤT SẮC!";
-                msg.innerText = "Kiến thức quy định & nghiệp vụ khảo thí của bạn cực kỳ vững vàng. Chúc mừng bạn đã hoàn thành xuất sắc bài ôn tập!";
+                msg.innerText = "Kiến thức quy định & nghiệp vụ khảo thí của Quý Thầy/Cô cực kỳ vững vàng. Chúc mừng Thầy/Cô đã hoàn thành xuất sắc bài ôn tập!";
             } else if (percent >= 50) {
                 icon.className = "inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-3 bg-blue-100 text-blue-600";
                 icon.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
                 title.innerText = "HOÀN THÀNH!";
-                msg.innerText = "Bạn đã nắm được hầu hết các quy trình khảo thí cơ bản. Hãy xem lại giải thích các câu sai để ghi nhớ kỹ hơn.";
+                msg.innerText = "Quý Thầy/Cô đã nắm được hầu hết các quy trình khảo thí cơ bản. Hãy xem lại giải thích các câu sai để ghi nhớ kỹ hơn.";
             } else {
                 icon.className = "inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-3 bg-rose-100 text-rose-600";
                 icon.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>';
                 title.innerText = "CẦN ÔN LẠI!";
-                msg.innerText = "Bạn nên dành thêm thời gian đọc lại Sổ tay Giảng viên và Quy chế Khảo thí DNTU để nắm chính xác các mốc thời gian quy định.";
+                msg.innerText = "Quý Thầy/Cô nên dành thêm thời gian xem lại Slide Tập huấn Khảo thí để nắm chính xác các mốc thời gian quy định.";
             }
 
             // Save to Firebase Leaderboard
@@ -520,10 +548,10 @@
             const percent = Math.round((score / questions.length) * 100);
             
             const report = `[BÁO CÁO KẾT QUẢ ÔN TẬP KHẢO THÍ DNTU]\n` +
-                           `• Họ và tên: ${userName}\n` +
+                           `• Thầy/Cô: ${userName}\n` +
                            `• Kết quả: ${score}/${questions.length} câu (${percent}%)\n` +
                            `• Thời gian hoàn thành: ${timeStr}\n` +
-                           `• Câu trả lời cafe: ${selectedCoffeeOption}\n` +
+                           `• Trả lời câu đặc biệt: ${selectedCoffeeOption}\n` +
                            `• Ngày thực hiện: ${new Date().toLocaleDateString('vi-VN')}\n` +
                            `------------------------------------\n` +
                            `${ADMIN_FULL_BRANDING}`;
@@ -537,9 +565,9 @@
             
             try {
                 document.execCommand('copy');
-                alert("Đã tự động sao chép kết quả!\nHệ thống sẽ chuyển hướng tới Zalo của Admin để bạn dán (Paste) và gửi báo cáo.");
+                alert("Đã tự động sao chép kết quả!\nHệ thống sẽ chuyển hướng tới Zalo của Admin để Quý Thầy/Cô dán (Paste) và gửi báo cáo.");
             } catch (err) {
-                alert("Không thể tự động chép bộ nhớ. Hệ thống vẫn sẽ mở Zalo cho bạn!");
+                alert("Không thể tự động chép bộ nhớ. Hệ thống vẫn sẽ mở Zalo cho Quý Thầy/Cô!");
             }
             document.body.removeChild(tempInput);
 
