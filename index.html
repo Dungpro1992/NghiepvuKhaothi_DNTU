@@ -503,14 +503,14 @@
             const resultsCol = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
             
             // Limit to 20 recently added docs to avoid massive queries, then sort top 5 in memory
-            const q = query(resultsCol, orderBy("timestamp", "desc"), limit(20)); 
+            const q = query(resultsCol, orderBy("score", "desc"), limit(20)); 
             
             onSnapshot(q, (snapshot) => {
                 const results = [];
                 snapshot.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
                 
-                // Ensure sorting by timestamp descending (newest first) and take top 5
-                results.sort((a, b) => b.timestamp - a.timestamp);
+                // Ensure sorting by score descending (newest first) and take top 10
+                results.sort((a, b) => b.score - a.score);
                 const top10 = results.slice(0, 10);
                 
                 renderLeaderboard(top10);
