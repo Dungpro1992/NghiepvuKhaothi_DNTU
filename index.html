@@ -477,11 +477,13 @@
             // Save to Firebase Leaderboard
             if (db && auth.currentUser) {
                 try {
+                    const percent = Math.round((score / questions.length) * 100);
                     const resultsCol = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
                     await addDoc(resultsCol, {
                         name: userName,
                         score: score,
                         total: questions.length,
+                        percent: percent,
                         time: timeStr,
                         coffeeAnswer: selectedCoffeeOption || "Không trả lời",
                         timestamp: new Date().getTime()
@@ -503,14 +505,14 @@
             const resultsCol = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
             
             // Limit to 20 recently added docs to avoid massive queries, then sort top 5 in memory
-            const q = query(resultsCol, orderBy("score", "desc"), limit(20)); 
+            const q = query(resultsCol, orderBy("percent", "desc"), limit(20)); 
             
             onSnapshot(q, (snapshot) => {
                 const results = [];
                 snapshot.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
                 
                 // Ensure sorting by score descending (newest first) and take top 10
-                results.sort((a, b) => b.score - a.score);
+                results.sort((a, b) => b.percent - a.percent);
                 const top10 = results.slice(0, 10);
                 
                 renderLeaderboard(top10);
