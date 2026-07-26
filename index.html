@@ -166,9 +166,13 @@
 
         // Mock Firebase Config for standalone execution
         const firebaseConfig = {
-            apiKey: "mock-key",
-            authDomain: "mock-domain",
-            projectId: "mock-project",
+        apiKey: "AIzaSyBdv9Y-WJZd2uKBikKuJXVil-3bURepiYM",
+        authDomain: "khao-thi-dntu.firebaseapp.com",
+        projectId: "khao-thi-dntu",
+        storageBucket: "khao-thi-dntu.firebasestorage.app",
+        messagingSenderId: "1042575985311",
+        appId: "1:1042575985311:web:f7b734f3e67153adbb30aa",
+        measurementId: "G-MTMXYKNX5Y"
         };
         const appId = 'dntu-khao-thi-quiz';
         
@@ -253,7 +257,7 @@
             { q: "Thời lượng TỐI ĐA áp dụng cho kỳ thi TRẮC NGHIỆM đối với môn từ 03 tín chỉ trở lên là?", o: ["Tối đa 60 phút", "Tối đa 75 phút", "Tối đa 90 phút", "Tối đa 120 phút"], c: 1, exp: "Thi Trắc nghiệm môn >= 3TC có thời gian tối đa 75 phút." },
             { q: "Học phần từ 03 tín chỉ trở lên thi TRẮC NGHIỆM KẾT HỢP TỰ LUẬN có thời lượng làm bài là bao nhiêu?", o: ["Tối thiểu 60 phút", "Tối thiểu 75 phút", "Tối thiểu 90 phút", "Tối thiểu 120 phút"], c: 2, exp: "Thi kết hợp TN+TL cho môn >= 3TC có thời gian tối thiểu 90 phút." },
             { q: "Đề thi trắc nghiệm khi nộp về Trung tâm Khảo thí bắt buộc phải kèm theo những gì?", o: ["Danh sách SV và Đáp án", "Đáp án và Ma trận đề", "Bài giảng, Đáp án, Ma trận đề", "Tùy môn học"], c: 1, exp: "Nộp đề trắc nghiệm bắt buộc đi kèm file Đáp án chuẩn và Ma trận phân bổ cấu trúc đề." },
-            { q: "Đối với các học phần chưa có ngân hàng đề, Giảng viên nộp đề thi về TTKT trong thời gian nào?", o: ["Chậm nhất 01 ngày trước ngày thi", "Chậm nhất 03 ngày trước ngày thi", "Chậm nhất 07 ngày trước ngày thi", "Trong ngày thi"], c: 2, exp: "Học phần chưa NHĐ phải nộp đề về TTKT chậm nhất 07 ngày trước ngày thi, tối thiểu 2 đề/ca." },
+            { q: "Đối với các học phần chưa có ngân hàng đề, Giảng viên nộp đề thi về Phòng KT&ĐBCL trong thời gian nào?", o: ["Chậm nhất 01 ngày trước ngày thi", "Chậm nhất 03 ngày trước ngày thi", "Chậm nhất 07 ngày trước ngày thi", "Trong ngày thi"], c: 2, exp: "Học phần chưa NHĐ phải nộp đề về TTKT chậm nhất 07 ngày trước ngày thi, tối thiểu 2 đề/ca." },
 
             // --- NHÓM 6: LỊCH THI & HOÃN THI (10 CÂU) ---
             { q: "Lịch thi đối với 'Học phần thi TẬP TRUNG' được công bố khi nào?", o: ["Trước khi thi 01 ngày", "Trước khi diễn ra kỳ thi tối thiểu 07 ngày", "Trước 1 tháng", "Ngay sau khi học xong"], c: 1, exp: "Lịch thi tập trung được công bố tối thiểu 07 ngày trước khi diễn ra kỳ thi." },
@@ -269,9 +273,9 @@
 
             // --- NHÓM 7: CÔNG TÁC COI THI & iTEST (15 CÂU) ---
             { q: "Giai đoạn trước giờ thi, Cán bộ coi thi phải có mặt tại phòng Hội đồng trước bao nhiêu phút?", o: ["15 phút", "20 phút", "30 phút", "45 phút"], c: 2, exp: "Quy định Nội quy phòng thi: CBCT phải có mặt trước 30 phút để nhận hồ sơ, sinh hoạt ca thi." },
-            { q: "Trước khi thi, Cán bộ coi thi phải ghi các thông tin gì lên bảng?", o: ["Chỉ ghi Môn thi", "Kỳ thi, ngày, môn, thời gian, tia thời gian, sơ đồ chỗ ngồi, các lưu ý", "Lời chúc thi tốt", "Không cần ghi"], c: 1, exp: "Bắt buộc ghi đầy đủ thông tin kỳ thi, tia thời gian, vẽ sơ đồ và các lưu ý (tắt đt...)." },
+            { q: "Trước khi thi, Cán bộ coi thi phải ghi các thông tin gì lên bảng?", o: ["Môn thi, kỳ thi, ngày thi, sơ đồ chỗ ngồi", "Kỳ thi, ngày, môn thi, thời gian, tia thời gian, sơ đồ chỗ ngồi, các lưu ý", "Lời chúc thi tốt", "Không cần ghi"], c: 1, exp: "Bắt buộc ghi đầy đủ thông tin kỳ thi, tia thời gian, vẽ sơ đồ và các lưu ý (tắt đt...)." },
             { q: "Khi phát hiện sinh viên mặc đồng phục KHÔNG ĐÚNG quy định, Giám thị xử lý thế nào?", o: ["Cho vào thi bình thường", "Trừ điểm", "Không cho vào thi, yêu cầu về thay đồng phục đúng quy định", "Lập biên bản"], c: 2, exp: "Giám thị kiểm tra đồng phục & thẻ trước cửa, nếu sai yêu cầu về thay." },
-            { q: "Sinh viên KHÔNG CÓ thẻ sinh viên/CCCD khi vào phòng thi phải xử lý thế nào?", o: ["Đuổi về không cho thi", "Làm Giấy cam đoan tại phòng Hội đồng và bổ sung giấy tờ trong vòng 24h", "Cho mượn thẻ", "Lập biên bản vi phạm"], c: 1, exp: "Sinh viên quên giấy tờ tùy thân phải xuống phòng Hội đồng làm cam đoan, bổ sung trong 24h." },
+            { q: "Sinh viên KHÔNG CÓ thẻ sinh viên/CCCD khi vào phòng thi phải xử lý thế nào?", o: ["Về lấy CCCD", "Làm Giấy cam đoan tại phòng Hội đồng và bổ sung giấy tờ trong vòng 24h", "Xuât trình VNeiD", "Lập biên bản vi phạm"], c: 1, exp: "Sinh viên quên giấy tờ tùy thân phải xuống phòng Hội đồng làm cam đoan, bổ sung trong 24h." },
             { q: "Trong thời gian coi thi, hành vi nào sau đây KHÔNG ĐƯỢC PHÉP thực hiện?", o: ["Quan sát sinh viên", "Ký giấy nháp", "Đọc báo, viết vẽ, nói chuyện riêng, sử dụng điện thoại, ngồi 1 chỗ", "Thu bài"], c: 2, exp: "Nghiêm cấm làm việc riêng, sử dụng điện thoại và thiếu tập trung trong ca thi." },
             { q: "Nếu Giám thị cần ra ngoài trong giờ thi (đi vệ sinh, sự cố đột xuất), quy trình đúng là?", o: ["Tự ý ra ngoài", "Nhờ sinh viên trông lớp", "Khóa cửa phòng thi", "Phải đề nghị Giám sát phòng thi hỗ trợ trông lớp"], c: 3, exp: "Giám thị tuyệt đối không tự ý rời phòng, phải nhờ Giám sát hỗ trợ mới được ra." },
             { q: "Đặc thù coi thi trên máy tính (Hệ thống iTest): Giám thị 1 (GT1) có được dùng Laptop cá nhân không?", o: ["Không", "Có, Được phép sử dụng laptop cá nhân để giám sát hệ thống iTest", "Dùng để lướt web", "Ai cũng được dùng"], c: 1, exp: "Chỉ GT1 được dùng laptop để điều khiển ca thi, cấp/mở khóa iTest." },
@@ -558,13 +562,13 @@
             const percent = Math.round((score / questions.length) * 100);
             
             const report = `[BÁO CÁO KẾT QUẢ ÔN TẬP KHẢO THÍ DNTU]\n` +
-                           `• Thầy/Cô: ${userName}\n` +
-                           `• Kết quả: ${score}/${questions.length} câu (${percent}%)\n` +
-                           `• Thời gian hoàn thành: ${timeStr}\n` +
-                           `• Trả lời câu đặc biệt: ${selectedCoffeeOption}\n` +
-                           `• Ngày thực hiện: ${new Date().toLocaleDateString('vi-VN')}\n` +
-                           `------------------------------------\n` +
-                           `${ADMIN_FULL_BRANDING}`;
+               `• Thầy/Cô: ${userName}\n` +
+               `• Kết quả: ${score}/${questions.length} câu (${percent}%)\n` +
+               `• Thời gian hoàn thành: ${timeStr}\n` +
+               `• Trả lời câu đặc biệt: ${selectedCoffeeOption}\n` +
+               `• Thời gian thực hiện: ${new Date().toLocaleString('vi-VN', { hour12: false })}`;
+                          
+                          
 
             // Reliable clipboard fallback
             const tempInput = document.createElement("textarea");
