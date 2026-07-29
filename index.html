@@ -222,12 +222,10 @@
         function validateName(name) {
             const words = name.trim().split(/\s+/);
             if(words.length < 2) return false;
-            // Biểu thức chính quy: Bắt đầu bằng chữ Hoa tiếng Việt, theo sau là các chữ thường tiếng Việt, không chứa số/kí tự đặc biệt
             const regex = /^[A-ZÁÀẢÃẠÂẤẦẨẪẬĂẮẰẲẴẶĐÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ][a-záàảãạâấầẩẫậăắằẳẵặđéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵ]*$/;
             return words.every(w => regex.test(w));
         }
 
-        // Ngân hàng 100 câu hỏi chuyên môn + 1 câu đặc biệt
         const rawBank = [
             // --- NHÓM 1: THỜI GIAN, QUY ĐỊNH, ĐÁNH GIÁ QUÁ TRÌNH (12 CÂU) ---
             { q: "Thời hạn quy định giảng viên phải nhập điểm quá trình lên hệ thống quản lý đào tạo sau khi kết thúc học phần là bao lâu?", o: ["03 ngày", "05 ngày", "07 ngày", "14 ngày"], c: 0, exp: "Theo QĐ 312, giảng viên phải nhập điểm quá trình trong vòng 03 ngày kể từ ngày kết thúc học phần." },
@@ -357,7 +355,7 @@
             { q: "Điểm học phần sau khi THI LẠI được quy định mức TỐI ĐA là bao nhiêu?", o: ["Tính bình thường", "Không vượt quá mức điểm B", "Không vượt quá mức điểm C", "Chỉ tính điểm D"], c: 2, exp: "Sinh viên thi lại dù 10 điểm thì tổng kết môn tối đa chỉ nhận được điểm C (Tương đương 6.9)." },
             { q: "Đối với học phần đăng ký thi lại, 'Điểm thi cuối kỳ' được tính như thế nào?", o: ["Lấy trung bình 2 lần thi", "Tính theo kết quả của LẦN THI LẠI (Có khống chế tổng điểm)", "Lấy điểm cao hơn", "Cộng dồn"], c: 1, exp: "Hệ thống lấy điểm bài thi lại để tính lại trung bình, nhưng khống chế điểm tổng kết max C." },
 
-            // --- CÂU SỐ 101: CÂU ĐẶC BIỆT THAY ĐỔI ---
+            // --- CÂU SỐ 101: CÂU ĐẶC BIỆT ---
             { q: "Quý Thầy/Cô có quen biết Admin không?", o: ["Thân thiết", "Xã giao (chỉ trao đổi công việc)", "Biết online (chưa gặp mặt)", "Chưa từng biết"], c: 0, exp: "Cảm ơn Quý Thầy/Cô đã tham gia! Sự đồng hành của Thầy/Cô là động lực rất lớn." }
         ];
 
@@ -519,6 +517,25 @@
                 msg.innerText = "Quý Thầy/Cô nên dành thêm thời gian xem lại Slide Tập huấn Khảo thí và QĐ 312 để nắm chính xác các quy định.";
             }
 
+            // ====== GHI LOG VÀO GOOGLE SHEETS ======
+            const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwPsyhFsFF6XhfIXXilse3B2zn0xGmpFfypKm9DrHkvhUOoB6xfUV25u1bv2xYLwwbbCQ/exec"; 
+
+            const sheetData = {
+                name: userName,
+                score: score,
+                total: questions.length,
+                time: timeStr,
+                coffeeAnswer: selectedCoffeeOption || "Không trả lời"
+            };
+
+            fetch(GOOGLE_SHEET_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(sheetData)
+            }).then(() => console.log("Đã gửi Google Sheets")).catch(e => console.error(e));
+            // =======================================
+
             if (db && auth.currentUser) {
                 if (modeCount === 100) {
                     try {
@@ -538,7 +555,6 @@
                         console.error("Lỗi lưu kết quả", e);
                     }
                 } else {
-                    // Nếu là 30 câu
                     msg.innerHTML += "<br><br><span class='text-amber-700 font-semibold block'><i>* Quý Thầy/Cô đang thi gói 30 câu nên kết quả sẽ không được ghi nhận lên Bảng Xếp Hạng. Hãy chọn gói 100 câu để đua Top nhé!</i></span>";
                     loadLeaderboards();
                 }
@@ -572,7 +588,7 @@
                 renderList(top5, 'leaderboard-top', 'amber');
             });
 
-            // Tải 5 kết quả mới nhất (Vẫn giữ nguyên, tính theo thời gian nộp bài mới nhất)
+            // Tải 5 kết quả mới nhất
             const qLatest = query(resultsCol, orderBy("timestamp", "desc"), limit(5)); 
             onSnapshot(qLatest, (snapshot) => {
                 const results = [];
