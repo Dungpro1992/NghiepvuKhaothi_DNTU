@@ -136,9 +136,9 @@
             <div id="summary-msg" class="bg-blue-50/80 text-blue-900 p-4 rounded-2xl mb-6 text-xs sm:text-sm font-semibold leading-relaxed border border-blue-200/80 text-left"></div>
 
             <div class="space-y-3 mt-auto">
-                <button onclick="document.getElementById('momo-modal').classList.remove('hidden')" class="w-full bg-[#A50064] hover:bg-[#8A0053] active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg shadow-pink-600/30 transition-all flex items-center justify-center gap-2">
+                <button onclick="document.getElementById('momo-modal').classList.remove('hidden')" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-1 14H5c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1zm-4-8h-2V8c0-.55-.45-1-1-1s-1 .45-1 1v2H9c-.55 0-1 .45-1 1s.45 1 1 1h2v2c0 .55.45 1 1 1s1-.45 1-1v-2h2c.55 0 1-.45 1-1s-.45-1-1-1z"/></svg>
-                    <span class="text-sm uppercase tracking-wider">MỜI ADMIN CAFE (MOMO)</span>
+                    <span class="text-sm uppercase tracking-wider">MỜI ADMIN CAFE</span>
                 </button>
                 <button onclick="location.reload()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl transition-all text-sm">
                     LÀM LẠI TỪ ĐẦU
@@ -545,19 +545,34 @@
             }
         }
 
-        function loadLeaderboards() {
+      function loadLeaderboards() {
             if (!db || !auth.currentUser) return;
             const resultsCol = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
             
-            // Tải Top 5
-            const qTop = query(resultsCol, orderBy("percent", "desc"), limit(5)); 
+            // Tải Top Bảng xếp hạng (lấy dư ra 20 kết quả để sắp xếp lại theo thời gian ở Client)
+            const qTop = query(resultsCol, orderBy("percent", "desc"), limit(20)); 
             onSnapshot(qTop, (snapshot) => {
                 const results = [];
                 snapshot.forEach(doc => results.push({ id: doc.id, ...doc.data() }));
-                renderList(results, 'leaderboard-top', 'amber');
+                
+                // SẮP XẾP KÉP: 
+                // Ưu tiên 1: Điểm số giảm dần
+                // Ưu tiên 2: Nếu bằng điểm -> Thời gian tăng dần (Ai làm nhanh hơn xếp trên)
+                results.sort((a, b) => {
+                    if (b.percent !== a.percent) {
+                        return b.percent - a.percent;
+                    } else {
+                        // So sánh chuỗi thời gian "MM:SS"
+                        return a.time.localeCompare(b.time);
+                    }
+                });
+
+                // Cắt lấy đúng 5 người đứng đầu sau khi đã sắp xếp kỹ
+                const top5 = results.slice(0, 5);
+                renderList(top5, 'leaderboard-top', 'amber');
             });
 
-            // Tải Latest 5
+            // Tải 5 kết quả mới nhất (Vẫn giữ nguyên, tính theo thời gian nộp bài mới nhất)
             const qLatest = query(resultsCol, orderBy("timestamp", "desc"), limit(5)); 
             onSnapshot(qLatest, (snapshot) => {
                 const results = [];
